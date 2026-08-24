@@ -263,6 +263,20 @@
             </div>
         </div>
 
+        <!-- ================= 🚗 頁面 3：車輛查詢 (Car Query) ================= -->
+        <div id="page-carQuery" class="page-view dashboard">
+            <div class="panel">
+                <div class="panel-header"><div class="panel-title">🚗 車輛登記與車牌查詢系統</div></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="carSearchInput" placeholder="請輸入車牌號碼（例如：AHE-6616、ABC-123）或車主名稱..." style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #334155; background-color: var(--bg-card); color: var(--text-main); outline: none;">
+                    <button class="btn primary" onclick="searchCar()">搜尋車輛</button>
+                </div>
+                <div id="carResultContainer">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">請輸入車牌或車主關鍵字進行查詢（可測試：AHE-6616、ABC-123、TWC-1215、NVI-100）</p>
+                </div>
+            </div>
+        </div>
+
         <!-- 通用預留分頁區塊 -->
         <div id="page-placeholder" class="page-view dashboard">
             <div class="panel">
@@ -330,39 +344,23 @@
             "1022": { name: "陳柏任", id: "#1022", dept: "SWAT", pwd: "1234" }
         };
 
-        // 從試算表同步的完整市民資料庫
+        // 市民資料庫
         const citizenDatabase = [
-            { id: "2654310823", roblox: "younger132", dc: "陽", vehicles: "Tesla motorts", plate: "AHE-6616", wanted: false, age: 17, job: "警察", license: "有", insurance: "有", record: "無", image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde" },
-            { id: "2772426897", roblox: "hjk33", dc: "羅魯承", vehicles: "Antelope", plate: "ABC-123", wanted: false, age: 9999, job: "消防", license: "有", insurance: "有", record: "無", image: "" },
-            { id: "4775123066", roblox: "hygyuggcy", dc: "王小翰", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4577569902", roblox: "YTijwjnnw", dc: "小陳", vehicles: "", plate: "", wanted: false, age: 18, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3955795459", roblox: "blliy100122", dc: "比利", vehicles: "", plate: "", wanted: false, age: 25, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "10006452639", roblox: "1cxzyyy", dc: "恩來恩去", vehicles: "", plate: "", wanted: false, age: 13, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "7535680679", roblox: "SB_GT7", dc: "我是該", vehicles: "", plate: "", wanted: false, age: 1722, job: "", license: "有", insurance: "", record: "", image: "" },
-            { id: "2891106011", roblox: "asp57512", dc: "郭宏碩", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4577569902", roblox: "YTijwjnnw", dc: "小陳", vehicles: "", plate: "", wanted: false, age: 18, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "5685715773", roblox: "TW_husky1", dc: "哈士奇安安", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "6157036950", roblox: "huggonus", dc: "鍋台民", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "10169589422", roblox: "LUCAS_070810", dc: "吉黑夜", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4912041926", roblox: "bohao_05166", dc: "楊", vehicles: "", plate: "", wanted: false, age: 43, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "5633167956", roblox: "Wzchen66", dc: "泡泡", vehicles: "", plate: "", wanted: false, age: 25, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3584411613", roblox: "roy029876", dc: "羅衣", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "10528158460", roblox: "LSpw2222", dc: "李家人", vehicles: "", plate: "", wanted: false, age: 25, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3692328612", roblox: "changyan6", dc: "白熊", vehicles: "", plate: "", wanted: false, age: 19, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4719207880", roblox: "AKAOWo5", dc: "金巢", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3543782031", roblox: "R_yan717", dc: "R燕", vehicles: "", plate: "", wanted: false, age: 30, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "8257562142", roblox: "fhjuheuf", dc: "黑狼", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "有", insurance: "", record: "", image: "" },
-            { id: "9683747076", roblox: "f0rsaken411", dc: "綠茶", vehicles: "", plate: "", wanted: false, age: 13, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4366713816", roblox: "ryder981215", dc: "老鼠", vehicles: "Antelope", plate: "TWC-1215", wanted: false, age: 16, job: "", license: "有", insurance: "", record: "", image: "" },
-            { id: "5298094599", roblox: "sa9613", dc: "陳可可", vehicles: "", plate: "", wanted: false, age: 20, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "4689198234", roblox: "kevinop0604", dc: "凱文", vehicles: "", plate: "", wanted: false, age: 18, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3581119378", roblox: "s109002", dc: "李偉傑", vehicles: "", plate: "", wanted: false, age: 21, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "3787804690", roblox: "jkuricky", dc: "陳安城", vehicles: "", plate: "", wanted: false, age: 17, job: "", license: "有", insurance: "有", record: "", image: "" },
-            { id: "8250019028", roblox: "TW_gzj", dc: "阿傑", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "有", insurance: "有", record: "", image: "" },
-            { id: "8287000104", roblox: "TT52472", dc: "繪~(^o^)", vehicles: "", plate: "", wanted: false, age: 24, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "9367620863", roblox: "Gtfere5", dc: "仁兄", vehicles: "", plate: "", wanted: false, age: 21, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "5556734273", roblox: "Whl0528", dc: "翰森", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "", insurance: "", record: "", image: "" },
-            { id: "5149320462", roblox: "w02012002", dc: "柯秒", vehicles: "", plate: "", wanted: false, age: 12, job: "", license: "", insurance: "", record: "", image: "" }
+            { id: "2654310823", roblox: "younger132", dc: "陽", vehicles: "Tesla motorts", plate: "AHE-6616", wanted: false, age: 17, job: "警察", license: "有", insurance: "有", record: "無" },
+            { id: "2772426897", roblox: "hjk33", dc: "羅魯承", vehicles: "Antelope", plate: "ABC-123", wanted: false, age: 9999, job: "消防", license: "有", insurance: "有", record: "無" },
+            { id: "4775123066", roblox: "hygyuggcy", dc: "王小翰", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "", insurance: "", record: "" },
+            { id: "4577569902", roblox: "YTijwjnnw", dc: "小陳", vehicles: "", plate: "", wanted: false, age: 18, job: "", license: "", insurance: "", record: "" },
+            { id: "3955795459", roblox: "blliy100122", dc: "比利", vehicles: "", plate: "", wanted: false, age: 25, job: "", license: "", insurance: "", record: "" },
+            { id: "4366713816", roblox: "ryder981215", dc: "老鼠", vehicles: "Antelope", plate: "TWC-1215", wanted: false, age: 16, job: "", license: "有", insurance: "", record: "" },
+            { id: "7557673020", roblox: "Taiwan_1268", dc: "pop_6cat_03909LON", vehicles: "CORBETA", plate: "NVI-100", wanted: false, age: 22, job: "", license: "有", insurance: "有", record: "" }
+        ];
+
+        // 🚗 從試算表同步的完整車輛資料庫
+        const vehicleDatabase = [
+            { plate: "AHE-6616", ownerId: "2654310823", ownerRoblox: "younger132", ownerDc: "younger132", model: "Tesla motorts", color: "black", insurance: "有", isIllegal: false, violations: "無" },
+            { plate: "ABC-123", ownerId: "2772426897", ownerRoblox: "hjk33", ownerDc: "estic_starfish_33", model: "Navara Horizon", color: "螢光綠", insurance: "有", isIllegal: false, violations: "無" },
+            { plate: "TWC-1215", ownerId: "4366713816", ownerRoblox: "ryder981215", ownerDc: "ryder2410", model: "Antelope", color: "blue", insurance: "有", isIllegal: false, violations: "無" },
+            { plate: "NVI-100", ownerId: "7557673020", ownerRoblox: "Taiwan_1268", ownerDc: "pop_6cat_03909LON", model: "CORBETA", color: "black", insurance: "有", isIllegal: false, violations: "無" }
         ];
 
         let currentUser = null;
@@ -448,7 +446,7 @@
             document.getElementById('stat-arrest').innerText = `5 人`;
         }
 
-        // 👤 執行人員查詢邏輯（對應 Google 試算表完整資料）
+        // 👤 執行人員查詢邏輯
         function searchPerson() {
             const keyword = document.getElementById('personSearchInput').value.trim().toLowerCase();
             const container = document.getElementById('personResultContainer');
@@ -465,7 +463,7 @@
             );
 
             if (found.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px;">查無此市民資料（可能是幽靈人口或未建檔）。</p>`;
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px;">查無此市民資料。</p>`;
                 return;
             }
 
@@ -487,6 +485,51 @@
                             <div>駕照狀態：<b style="color: var(--text-main);">${person.license ? '有' : '無'}</b></div>
                             <div>保險狀態：<b style="color: var(--text-main);">${person.insurance ? '有' : '無'}</b></div>
                             <div style="grid-column: span 2;">前科/紀錄：<b style="color: var(--accent-yellow);">${person.record || '無前科紀錄'}</b></div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 🚗 執行車輛查詢邏輯
+        function searchCar() {
+            const keyword = document.getElementById('carSearchInput').value.trim().toLowerCase();
+            const container = document.getElementById('carResultContainer');
+
+            if (!keyword) {
+                container.innerHTML = `<p style="color: var(--accent-red); text-align: center; padding: 20px;">⚠️ 請輸入要搜尋的車牌號碼或車主名稱！</p>`;
+                return;
+            }
+
+            const found = vehicleDatabase.filter(v => 
+                v.plate.toLowerCase().includes(keyword) || 
+                v.ownerRoblox.toLowerCase().includes(keyword) || 
+                v.ownerDc.toLowerCase().includes(keyword) ||
+                v.model.toLowerCase().includes(keyword)
+            );
+
+            if (found.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px;">查無此車輛或車牌登記資料。</p>`;
+                return;
+            }
+
+            let html = '';
+            found.forEach(car => {
+                const illegalBadge = car.isIllegal ? `<span class="badge red">⚠️ 車籍異常/涉案</span>` : `<span class="badge green">車籍正常</span>`;
+                html += `
+                    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                            <h3 style="font-size: 16px; color: var(--text-main);">🚗 車牌：<span style="color: var(--accent-blue);">${car.plate}</span> (${car.model})</h3>
+                            <div>${illegalBadge}</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; color: var(--text-muted);">
+                            <div>車身顏色：<b style="color: var(--text-main);">${car.color}</b></div>
+                            <div>保險狀態：<b style="color: var(--text-main);">${car.insurance}</b></div>
+                            <div>違規紀錄：<b style="color: var(--accent-yellow);">${car.violations}</b></div>
+                            <div>車主 ID：<b style="color: var(--text-main);">${car.ownerId}</b></div>
+                            <div>車主 Roblox：<b style="color: var(--text-main);">${car.ownerRoblox}</b></div>
+                            <div>車主 Discord：<b style="color: var(--text-main);">${car.ownerDc}</b></div>
                         </div>
                     </div>
                 `;
@@ -580,10 +623,11 @@
                 document.getElementById('page-home').classList.add('active');
             } else if (pageId === 'personQuery') {
                 document.getElementById('page-personQuery').classList.add('active');
+            } else if (pageId === 'carQuery') {
+                document.getElementById('page-carQuery').classList.add('active');
             } else {
                 document.getElementById('page-placeholder').classList.add('active');
                 const titles = {
-                    'carQuery': '🚗 車輛登記與車牌查詢',
                     'wantedQuery': '🔍 通緝犯與協尋車輛資料庫',
                     'caseList': '📋 勤務中心案件列表總覽',
                     'supportReq': '🚨 即時警力支援請求與發佈',
