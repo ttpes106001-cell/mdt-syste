@@ -84,6 +84,26 @@
     .btn.danger { background-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
     .btn.danger:hover { background-color: var(--accent-red); color: white; }
 
+    /* ================= 彈出視窗 (Modal) 樣式 ================= */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+    .modal-content { background-color: var(--bg-panel); width: 650px; max-width: 90%; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden; animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { font-size: 18px; color: var(--text-main); margin: 0; }
+    .close-btn { font-size: 24px; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+    .close-btn:hover { color: var(--accent-red); }
+    .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
+    .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background-color: rgba(0,0,0,0.2); }
+    
+    /* ================= 表單樣式 ================= */
+    .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+    .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { width: 100%; }
+    .form-group label { font-size: 13px; color: var(--text-muted); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #334155; background-color: var(--bg-card); color: var(--text-main); outline: none; font-size: 14px; transition: 0.2s;}
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
   </style>
 </head>
 <body>
@@ -106,7 +126,8 @@
       
       <div class="nav-group-title">勤務中心</div>
       <div class="nav-item">📋 案件列表</div>
-      <div class="nav-item">➕ 建立案件</div>
+      <!-- ⚠️ 在這裡加入了 onclick 呼叫彈出視窗 -->
+      <div class="nav-item" onclick="openModal('createCaseModal')">➕ 建立案件</div>
       <div class="nav-item">🚨 支援請求</div>
       <div class="nav-item">📄 案件報告</div>
       
@@ -160,7 +181,6 @@
 
       <!-- 雙欄排版 -->
       <div class="content-grid">
-        
         <!-- 左側：待處理案件 -->
         <div class="panel">
           <div class="panel-header">
@@ -246,5 +266,99 @@
     </div>
   </div>
 
+  <!-- ================= ➕ 建立案件 彈出視窗 ================= -->
+  <div id="createCaseModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>➕ 建立新案件</h2>
+        <span class="close-btn" onclick="closeModal('createCaseModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="createCaseForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>案件名稱 <span style="color:red">*</span></label>
+              <input type="text" id="caseName" placeholder="例如：持械搶劫、超速追逐" required>
+            </div>
+            <div class="form-group">
+              <label>案件類型</label>
+              <select id="caseType">
+                <option>重大刑案 (Felony)</option>
+                <option>一般違規 (Misdemeanor)</option>
+                <option>交通事故 (Traffic)</option>
+                <option>民眾求助 (Civil)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>發生地點</label>
+              <input type="text" id="caseLocation" placeholder="例如：Downtown 銀行前">
+            </div>
+            <div class="form-group">
+              <label>報案人 / 涉案人</label>
+              <input type="text" id="casePerson" placeholder="請輸入姓名或身分證字號">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>案件描述</label>
+              <textarea id="caseDesc" placeholder="請詳細描述案件發生經過與現場狀況..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('createCaseModal')">取消</button>
+        <button class="btn primary" onclick="submitCase()">建立案件</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript 功能 -->
+  <script>
+    // 打開彈出視窗
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+
+    // 關閉彈出視窗
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // 點擊視窗外圍背景也能關閉視窗
+    window.onclick = function(event) {
+      const modal = document.getElementById('createCaseModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // 處理「建立案件」按鈕的點擊
+    function submitCase() {
+      const caseName = document.getElementById('caseName').value;
+      const caseType = document.getElementById('caseType').value;
+      
+      // 檢查必填欄位
+      if (caseName.trim() === '') {
+        alert('⚠️ 請輸入案件名稱！');
+        return;
+      }
+
+      // 自動產生案件編號 (例如: CASE-2026-0824-001)
+      const now = new Date();
+      const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+      const randomId = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+      const fullCaseId = `CASE-${dateStr}-${randomId}`;
+
+      // 模擬建立成功提示
+      alert(`✅ 案件建立成功！\n\n案件編號：${fullCaseId}\n案件名稱：${caseName}\n案件類型：${caseType}\n\n系統已同步至資料庫。`);
+      
+      // 清空表單並關閉視窗
+      document.getElementById('createCaseForm').reset();
+      closeModal('createCaseModal');
+    }
+  </script>
 </body>
 </html>
