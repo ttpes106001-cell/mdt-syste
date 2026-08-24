@@ -749,6 +749,28 @@
         window.onclick = function(event) {
             if (event.target == document.getElementById('createCaseModal')) closeModal('createCaseModal');
         }
+        // 請將這裡換成您剛剛部署好的 Apps Script 網頁應用程式網址
+const API_URL = "https://script.google.com/macros/s/AKfycbvCUzDB5m87fXrLe4SNGJaFlkDw1GO8nWD0jZjVNB9Q8zCC3PJCMirJ43wnRtWlDjQ/exec";
+
+async function syncMDTData() {
+  try {
+    console.log("正在從 Google 試算表同步資料...");
+    let response = await fetch(API_URL);
+    let data = await response.json();
+    
+    console.log("成功取得同步資料：", data);
+    
+    // 這裡您可以將抓到的 data 填入您的網頁表格中
+    // 範例：假設您的表格 tbody ID 是 "dataTableBody"
+    // renderTableToUI(data);
+
+  } catch (error) {
+    console.error("同步資料失敗：", error);
+  }
+}
+
+// 當網頁開啟或重新整理時自動執行同步
+window.addEventListener("DOMContentLoaded", syncMDTData);
     </script>
 </body>
 </html>
