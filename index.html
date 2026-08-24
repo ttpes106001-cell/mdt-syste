@@ -280,13 +280,13 @@
         <!-- ================= 🔍 頁面 4：通緝/協尋查詢 (Wanted Query) ================= -->
         <div id="page-wantedQuery" class="page-view dashboard">
             <div class="panel">
-                <div class="panel-header"><div class="panel-title">🔍 通緝犯與協尋車輛資料庫</div></div>
+                <div class="panel-header"><div class="panel-title">🔍 通緝犯與協尋車輛資料庫 (自動同步自人員與車輛資料庫)</div></div>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="wantedSearchInput" placeholder="請輸入嫌疑人姓名、身分證字號或通緝車牌..." style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #334155; background-color: var(--bg-card); color: var(--text-main); outline: none;">
-                    <button class="btn primary" onclick="searchWanted()">搜尋通緝/協尋</button>
+                    <input type="text" id="wantedSearchInput" placeholder="請輸入關鍵字過濾通緝或協尋名單..." style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #334155; background-color: var(--bg-card); color: var(--text-main); outline: none;">
+                    <button class="btn primary" onclick="searchWanted()">篩選通緝/協尋</button>
                 </div>
                 <div id="wantedResultContainer">
-                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">點擊上方按鈕可檢視所有目前通緝與協尋清單，或輸入關鍵字過濾。</p>
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">正在載入通緝與協尋清單...</p>
                 </div>
             </div>
         </div>
@@ -358,7 +358,7 @@
             "1022": { name: "陳柏任", id: "#1022", dept: "SWAT", pwd: "1234" }
         };
 
-        // 市民資料庫 (包含部分通緝狀態範例)
+        // 市民資料庫 (通緝狀態直接由 citizenDatabase 的 wanted 屬性決定)
         const citizenDatabase = [
             { id: "2654310823", roblox: "younger132", dc: "陽", vehicles: "Tesla motorts", plate: "AHE-6616", wanted: false, age: 17, job: "警察", license: "有", insurance: "有", record: "無" },
             { id: "2772426897", roblox: "hjk33", dc: "羅魯承", vehicles: "Antelope", plate: "ABC-123", wanted: false, age: 9999, job: "消防", license: "有", insurance: "有", record: "無" },
@@ -369,7 +369,7 @@
             { id: "7557673020", roblox: "Taiwan_1268", dc: "pop_6cat_03909LON", vehicles: "CORBETA", plate: "NVI-100", wanted: false, age: 22, job: "", license: "有", insurance: "有", record: "" }
         ];
 
-        // 🚗 從試算表同步的完整車輛資料庫
+        // 🚗 車輛資料庫 (協尋狀態直接由 vehicleDatabase 的 isIllegal 屬性決定)
         const vehicleDatabase = [
             { plate: "AHE-6616", ownerId: "2654310823", ownerRoblox: "younger132", ownerDc: "younger132", model: "Tesla motorts", color: "black", insurance: "有", isIllegal: false, violations: "無" },
             { plate: "ABC-123", ownerId: "2772426897", ownerRoblox: "hjk33", ownerDc: "estic_starfish_33", model: "Navara Horizon", color: "螢光綠", insurance: "有", isIllegal: false, violations: "無" },
@@ -427,7 +427,7 @@
             renderHomeCases();
             updateStats();
             setDutyStatus('10-8');
-            searchWanted(''); // 預設載入通緝清單
+            searchWanted(''); // 預設載入通緝與協尋清單
         }
 
         function renderHomeCases() {
@@ -566,16 +566,17 @@
             container.innerHTML = html;
         }
 
-        // ================= 🔍 執行通緝與協尋查詢邏輯 =================
+        // ================= 🔍 自動同步自市民與車輛資料庫的通緝/協尋查詢 =================
         function searchWanted() {
             const keyword = document.getElementById('wantedSearchInput') ? document.getElementById('wantedSearchInput').value.trim().toLowerCase() : '';
             const container = document.getElementById('wantedResultContainer');
 
-            // 篩選通緝市民與協尋車輛
+            // 直接從 citizenDatabase 過濾出 wanted === true 的資料
             const wantedCitizens = citizenDatabase.filter(c => c.wanted && (
                 !keyword || c.dc.toLowerCase().includes(keyword) || c.roblox.toLowerCase().includes(keyword) || c.id.toLowerCase().includes(keyword)
             ));
 
+            // 直接從 vehicleDatabase 過濾出 isIllegal === true 的資料
             const illegalCars = vehicleDatabase.filter(v => v.isIllegal && (
                 !keyword || v.plate.toLowerCase().includes(keyword) || v.ownerDc.toLowerCase().includes(keyword) || v.model.toLowerCase().includes(keyword)
             ));
@@ -585,7 +586,7 @@
                 return;
             }
 
-            let html = `<h4 style="margin-bottom: 10px; color: var(--accent-red);">🚨 通緝中人員名單 (${wantedCitizens.length} 人)</h4>`;
+            let html = `<h4 style="margin-bottom: 10px; color: var(--accent-red);">🚨 通緝中人員名單 (${wantedCitizens.length} 人) - 同步自人員資料庫</h4>`;
             
             if (wantedCitizens.length > 0) {
                 wantedCitizens.forEach(person => {
@@ -610,7 +611,7 @@
                 html += `<p style="color: var(--text-muted); margin-bottom: 15px;">目前無符合條件的通緝人員。</p>`;
             }
 
-            html += `<h4 style="margin: 20px 0 10px; color: var(--accent-yellow);">🚗 涉案與協尋車輛名單 (${illegalCars.length} 輛)</h4>`;
+            html += `<h4 style="margin: 20px 0 10px; color: var(--accent-yellow);">🚗 涉案與協尋車輛名單 (${illegalCars.length} 輛) - 同步自車輛資料庫</h4>`;
             
             if (illegalCars.length > 0) {
                 illegalCars.forEach(car => {
@@ -728,7 +729,7 @@
                 document.getElementById('page-carQuery').classList.add('active');
             } else if (pageId === 'wantedQuery') {
                 document.getElementById('page-wantedQuery').classList.add('active');
-                searchWanted(); // 切換過來時自動載入/更新通緝清單
+                searchWanted(); // 切換過來時自動讀取最新同步資料
             } else {
                 document.getElementById('page-placeholder').classList.add('active');
                 const titles = {
