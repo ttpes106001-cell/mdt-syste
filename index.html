@@ -277,6 +277,20 @@
             </div>
         </div>
 
+        <!-- ================= 🔍 頁面 4：通緝/協尋查詢 (Wanted Query) ================= -->
+        <div id="page-wantedQuery" class="page-view dashboard">
+            <div class="panel">
+                <div class="panel-header"><div class="panel-title">🔍 通緝犯與協尋車輛資料庫</div></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="wantedSearchInput" placeholder="請輸入嫌疑人姓名、身分證字號或通緝車牌..." style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #334155; background-color: var(--bg-card); color: var(--text-main); outline: none;">
+                    <button class="btn primary" onclick="searchWanted()">搜尋通緝/協尋</button>
+                </div>
+                <div id="wantedResultContainer">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">點擊上方按鈕可檢視所有目前通緝與協尋清單，或輸入關鍵字過濾。</p>
+                </div>
+            </div>
+        </div>
+
         <!-- 通用預留分頁區塊 -->
         <div id="page-placeholder" class="page-view dashboard">
             <div class="panel">
@@ -344,13 +358,13 @@
             "1022": { name: "陳柏任", id: "#1022", dept: "SWAT", pwd: "1234" }
         };
 
-        // 市民資料庫
+        // 市民資料庫 (包含部分通緝狀態範例)
         const citizenDatabase = [
             { id: "2654310823", roblox: "younger132", dc: "陽", vehicles: "Tesla motorts", plate: "AHE-6616", wanted: false, age: 17, job: "警察", license: "有", insurance: "有", record: "無" },
             { id: "2772426897", roblox: "hjk33", dc: "羅魯承", vehicles: "Antelope", plate: "ABC-123", wanted: false, age: 9999, job: "消防", license: "有", insurance: "有", record: "無" },
-            { id: "4775123066", roblox: "hygyuggcy", dc: "王小翰", vehicles: "", plate: "", wanted: false, age: 14, job: "", license: "", insurance: "", record: "" },
+            { id: "4775123066", roblox: "hygyuggcy", dc: "王小翰", vehicles: "", plate: "", wanted: true, wantedReason: "涉嫌強盜、拒捕逃逸", age: 14, job: "", license: "", insurance: "", record: "強盜前科" },
             { id: "4577569902", roblox: "YTijwjnnw", dc: "小陳", vehicles: "", plate: "", wanted: false, age: 18, job: "", license: "", insurance: "", record: "" },
-            { id: "3955795459", roblox: "blliy100122", dc: "比利", vehicles: "", plate: "", wanted: false, age: 25, job: "", license: "", insurance: "", record: "" },
+            { id: "3955795459", roblox: "blliy100122", dc: "比利", vehicles: "", plate: "", wanted: true, wantedReason: "持械恐嚇、妨害公務", age: 25, job: "", license: "", insurance: "", record: "妨害公務" },
             { id: "4366713816", roblox: "ryder981215", dc: "老鼠", vehicles: "Antelope", plate: "TWC-1215", wanted: false, age: 16, job: "", license: "有", insurance: "", record: "" },
             { id: "7557673020", roblox: "Taiwan_1268", dc: "pop_6cat_03909LON", vehicles: "CORBETA", plate: "NVI-100", wanted: false, age: 22, job: "", license: "有", insurance: "有", record: "" }
         ];
@@ -360,7 +374,7 @@
             { plate: "AHE-6616", ownerId: "2654310823", ownerRoblox: "younger132", ownerDc: "younger132", model: "Tesla motorts", color: "black", insurance: "有", isIllegal: false, violations: "無" },
             { plate: "ABC-123", ownerId: "2772426897", ownerRoblox: "hjk33", ownerDc: "estic_starfish_33", model: "Navara Horizon", color: "螢光綠", insurance: "有", isIllegal: false, violations: "無" },
             { plate: "TWC-1215", ownerId: "4366713816", ownerRoblox: "ryder981215", ownerDc: "ryder2410", model: "Antelope", color: "blue", insurance: "有", isIllegal: false, violations: "無" },
-            { plate: "NVI-100", ownerId: "7557673020", ownerRoblox: "Taiwan_1268", ownerDc: "pop_6cat_03909LON", model: "CORBETA", color: "black", insurance: "有", isIllegal: false, violations: "無" }
+            { plate: "NVI-100", ownerId: "7557673020", ownerRoblox: "Taiwan_1268", ownerDc: "pop_6cat_03909LON", model: "CORBETA", color: "black", insurance: "有", isIllegal: true, violations: "涉嫌重大刑案車輛協尋" }
         ];
 
         let currentUser = null;
@@ -413,6 +427,7 @@
             renderHomeCases();
             updateStats();
             setDutyStatus('10-8');
+            searchWanted(''); // 預設載入通緝清單
         }
 
         function renderHomeCases() {
@@ -456,7 +471,6 @@
                 return;
             }
 
-            // 若是從車主 ID 點擊傳入，確保 input 同時被賦值
             if (targetId) {
                 const inputEl = document.getElementById('personSearchInput');
                 if (inputEl) inputEl.value = targetId;
@@ -491,6 +505,7 @@
                             <div>駕照狀態：<b style="color: var(--text-main);">${person.license ? '有' : '無'}</b></div>
                             <div>保險狀態：<b style="color: var(--text-main);">${person.insurance ? '有' : '無'}</b></div>
                             <div style="grid-column: span 2;">前科/紀錄：<b style="color: var(--accent-yellow);">${person.record || '無前科紀錄'}</b></div>
+                            ${person.wanted ? `<div style="grid-column: span 3; color: var(--accent-red);">通緝事由：<b>${person.wantedReason}</b></div>` : ''}
                         </div>
                     </div>
                 `;
@@ -500,15 +515,13 @@
 
         // 🔗 點擊車主 ID 觸發雙向聯動跳轉
         function jumpToPersonSearch(ownerId) {
-            // 1. 切換至人員查詢分頁
             switchPage('personQuery', document.querySelector('.nav-item:nth-child(2)'));
-            // 2. 自動代入身分證並執行搜尋
             setTimeout(() => {
                 searchPerson(ownerId);
             }, 50);
         }
 
-        // 🚗 執行車輛查詢邏輯（已內建車主 ID 可點擊聯動）
+        // 🚗 執行車輛查詢邏輯
         function searchCar() {
             const keyword = document.getElementById('carSearchInput').value.trim().toLowerCase();
             const container = document.getElementById('carResultContainer');
@@ -550,6 +563,78 @@
                     </div>
                 `;
             });
+            container.innerHTML = html;
+        }
+
+        // ================= 🔍 執行通緝與協尋查詢邏輯 =================
+        function searchWanted() {
+            const keyword = document.getElementById('wantedSearchInput') ? document.getElementById('wantedSearchInput').value.trim().toLowerCase() : '';
+            const container = document.getElementById('wantedResultContainer');
+
+            // 篩選通緝市民與協尋車輛
+            const wantedCitizens = citizenDatabase.filter(c => c.wanted && (
+                !keyword || c.dc.toLowerCase().includes(keyword) || c.roblox.toLowerCase().includes(keyword) || c.id.toLowerCase().includes(keyword)
+            ));
+
+            const illegalCars = vehicleDatabase.filter(v => v.isIllegal && (
+                !keyword || v.plate.toLowerCase().includes(keyword) || v.ownerDc.toLowerCase().includes(keyword) || v.model.toLowerCase().includes(keyword)
+            ));
+
+            if (wantedCitizens.length === 0 && illegalCars.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px;">目前沒有符合條件的通緝犯或協尋車輛。</p>`;
+                return;
+            }
+
+            let html = `<h4 style="margin-bottom: 10px; color: var(--accent-red);">🚨 通緝中人員名單 (${wantedCitizens.length} 人)</h4>`;
+            
+            if (wantedCitizens.length > 0) {
+                wantedCitizens.forEach(person => {
+                    html += `
+                        <div style="background-color: var(--bg-card); border: 1px solid var(--accent-red); border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <h3 style="font-size: 16px; color: var(--text-main);">👤 ${person.dc} <span style="font-size: 12px; color: var(--text-muted);">(Roblox: ${person.roblox})</span></h3>
+                                <span class="badge red">⚠️ 通緝中</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                                <div>身分證字號 (ID)：<a href="#" onclick="jumpToPersonSearch('${person.id}'); return false;" style="color: var(--accent-blue); text-decoration: underline; font-weight: bold; cursor: pointer;">${person.id} 🔍</a></div>
+                                <div>年齡：<b style="color: var(--text-main);">${person.age} 歲</b></div>
+                                <div>前科紀錄：<b style="color: var(--accent-yellow);">${person.record}</b></div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent-red); background: rgba(239,68,68,0.1); padding: 8px; border-radius: 4px;">
+                                <b>通緝事由：</b>${person.wantedReason}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p style="color: var(--text-muted); margin-bottom: 15px;">目前無符合條件的通緝人員。</p>`;
+            }
+
+            html += `<h4 style="margin: 20px 0 10px; color: var(--accent-yellow);">🚗 涉案與協尋車輛名單 (${illegalCars.length} 輛)</h4>`;
+            
+            if (illegalCars.length > 0) {
+                illegalCars.forEach(car => {
+                    html += `
+                        <div style="background-color: var(--bg-card); border: 1px solid var(--accent-yellow); border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <h3 style="font-size: 16px; color: var(--text-main);">🚗 車牌：<span style="color: var(--accent-blue);">${car.plate}</span> (${car.model})</h3>
+                                <span class="badge yellow">⚠️ 協尋中</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                                <div>車身顏色：<b style="color: var(--text-main);">${car.color}</b></div>
+                                <div>車主 ID：<a href="#" onclick="jumpToPersonSearch('${car.ownerId}'); return false;" style="color: var(--accent-blue); text-decoration: underline; font-weight: bold; cursor: pointer;">${car.ownerId} 🔍</a></div>
+                                <div>車主 Discord：<b style="color: var(--text-main);">${car.ownerDc}</b></div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent-yellow); background: rgba(245,158,11,0.1); padding: 8px; border-radius: 4px;">
+                                <b>協尋原因：</b>${car.violations}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p style="color: var(--text-muted);">目前無符合條件的協尋車輛。</p>`;
+            }
+
             container.innerHTML = html;
         }
 
@@ -641,10 +726,12 @@
                 document.getElementById('page-personQuery').classList.add('active');
             } else if (pageId === 'carQuery') {
                 document.getElementById('page-carQuery').classList.add('active');
+            } else if (pageId === 'wantedQuery') {
+                document.getElementById('page-wantedQuery').classList.add('active');
+                searchWanted(); // 切換過來時自動載入/更新通緝清單
             } else {
                 document.getElementById('page-placeholder').classList.add('active');
                 const titles = {
-                    'wantedQuery': '🔍 通緝犯與協尋車輛資料庫',
                     'caseList': '📋 勤務中心案件列表總覽',
                     'supportReq': '🚨 即時警力支援請求與發佈',
                     'caseReports': '📄 案件報告與筆錄管理',
