@@ -1,2424 +1,4598 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Stellar Capital | DOJ RP 警務 MDT 系統</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --bg: #0b1120;
-            --sidebar: #111827;
-            --card: #172033;
-            --card-hover: #1d2940;
-            --border: #2a3854;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-        }
-
-        body {
-            font-family:
-                "Noto Sans TC",
-                "Microsoft JhengHei",
-                Arial,
-                sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* =========================
-           登入畫面
-        ========================= */
-
-        #loginScreen {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background:
-                radial-gradient(
-                    circle at top right,
-                    rgba(59, 130, 246, 0.2),
-                    transparent 40%
-                ),
-                var(--bg);
-        }
-
-        .login-box {
-            width: 420px;
-            max-width: 90%;
-            background: rgba(23, 32, 51, 0.95);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 40px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-logo h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .login-logo p {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        /* =========================
-           系統主畫面
-        ========================= */
-
-        #app {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 260px;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-header h2 {
-            font-size: 20px;
-        }
-
-        .sidebar-header p {
-            color: var(--muted);
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .nav {
-            padding: 15px 10px;
-            flex: 1;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 13px 15px;
-            margin-bottom: 5px;
-            border: none;
-            background: transparent;
-            color: var(--muted);
-            text-align: left;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            transition: 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid var(--border);
-        }
-
-        .logout-btn {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--danger);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .main {
-            margin-left: 260px;
-            min-height: 100vh;
-        }
-
-        .topbar {
-            height: 70px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            background: rgba(17, 24, 39, 0.8);
-        }
-
-        .topbar-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .officer-info {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* =========================
-           卡片
-        ========================= */
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 22px;
-        }
-
-        .stat-card h3 {
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: normal;
-        }
-
-        .stat-card .number {
-            font-size: 32px;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .panel h2 {
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        /* =========================
-           表單
-        ========================= */
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: #0f172a;
-            color: white;
-            font-size: 14px;
-            outline: none;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--primary);
-        }
-
-        button {
-            font-family: inherit;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 8px;
-            padding: 11px 18px;
-            cursor: pointer;
-            color: white;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-success {
-            background: var(--success);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-        }
-
-        /* =========================
-           搜尋
-        ========================= */
-
-        .search-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-row input {
-            flex: 1;
-        }
-
-        /* =========================
-           表格
-        ========================= */
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        th {
-            color: var(--muted);
-            font-weight: normal;
-        }
-
-        tr:hover td {
-            background: rgba(255,255,255,0.02);
-        }
-
-        .status {
-            display: inline-block;
-            padding: 5px 9px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        .status-active {
-            background: rgba(239,68,68,0.15);
-            color: #f87171;
-        }
-
-        .status-normal {
-            background: rgba(34,197,94,0.15);
-            color: #4ade80;
-        }
-
-        /* =========================
-           Modal
-        ========================= */
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            inset: 0;
-            background: rgba(0,0,0,0.65);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            width: 650px;
-            max-width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 25px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            background: transparent;
-            color: var(--muted);
-            border: none;
-            font-size: 25px;
-            cursor: pointer;
-        }
-
-        .detail-row {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .detail-label {
-            color: var(--muted);
-        }
-
-        /* =========================
-           Toast
-        ========================= */
-
-        #toast {
-            position: fixed;
-            right: 25px;
-            bottom: 25px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 15px 20px;
-            border-radius: 10px;
-            display: none;
-            z-index: 2000;
-        }
-
-        #toast.show {
-            display: block;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: var(--muted);
-        }
-
-        @media (max-width: 800px) {
-
-            .sidebar {
-                width: 70px;
-            }
-
-            .sidebar-header h2,
-            .sidebar-header p,
-            .nav-btn span,
-            .logout-btn span {
-                display: none;
-            }
-
-            .nav-btn {
-                text-align: center;
-                font-size: 20px;
-            }
-
-            .main {
-                margin-left: 70px;
-            }
-
-            .content {
-                padding: 15px;
-            }
-
-            .topbar {
-                padding: 0 15px;
-            }
-
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stellar Capital | DOJ RP MDT</title>
+
+<style>
+:root{
+    --bg:#0b0f17;
+    --panel:#121827;
+    --card:#1a2233;
+    --card2:#202a3d;
+    --border:#2b364d;
+    --text:#e7edf7;
+    --muted:#8996aa;
+    --blue:#3b82f6;
+    --green:#10b981;
+    --red:#ef4444;
+    --yellow:#f59e0b;
+    --orange:#f97316;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:"Microsoft JhengHei","Segoe UI",sans-serif;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+/* ================= LOGIN ================= */
+
+#login-screen{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(circle at 50% 15%,rgba(59,130,246,.18),transparent 40%),
+        var(--bg);
+}
+
+.login-card{
+    width:420px;
+    max-width:92%;
+    background:rgba(18,24,39,.97);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:40px;
+    box-shadow:0 25px 80px rgba(0,0,0,.65);
+    text-align:center;
+}
+
+.login-logo{
+    width:76px;
+    height:76px;
+    margin:0 auto 18px;
+    border-radius:18px;
+    background:linear-gradient(145deg,#2563eb,#1d4ed8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+}
+
+.login-card h1{
+    font-size:23px;
+}
+
+.login-card .subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin:6px 0 28px;
+}
+
+.login-error{
+    display:none;
+    color:#f87171;
+    background:rgba(239,68,68,.1);
+    border:1px solid rgba(239,68,68,.3);
+    padding:9px;
+    border-radius:6px;
+    font-size:11px;
+    margin-bottom:13px;
+}
+
+.demo-account{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:15px;
+}
+
+/* ================= APP ================= */
+
+.app{
+    width:100%;
+    height:100vh;
+    display:flex;
+}
+
+.sidebar{
+    width:255px;
+    flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+}
+
+.logo-area{
+    height:75px;
+    padding:15px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-icon{
+    font-size:29px;
+}
+
+.logo-title{
+    font-size:15px;
+    font-weight:bold;
+}
+
+.logo-sub{
+    color:#60a5fa;
+    font-size:10px;
+    margin-top:3px;
+}
+
+.nav{
+    padding:10px 0;
+    overflow:auto;
+}
+
+.nav-title{
+    color:#5e6a7e;
+    font-size:10px;
+    margin:18px 20px 6px;
+    letter-spacing:1px;
+}
+
+.nav-item{
+    padding:11px 18px;
+    margin:2px 8px;
+    border-radius:6px;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    transition:.18s;
+}
+
+.nav-item:hover{
+    background:#1b2538;
+    color:white;
+}
+
+.nav-item.active{
+    background:rgba(59,130,246,.14);
+    color:#60a5fa;
+    border-left:3px solid var(--blue);
+}
+
+.main{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+}
+
+.topbar{
+    height:64px;
+    flex-shrink:0;
+    background:var(--panel);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+}
+
+.top-left,
+.top-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.top-left{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.user{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    background:var(--green);
+    border-radius:50%;
+}
+
+.notification{
+    position:relative;
+    cursor:pointer;
+    font-size:19px;
+}
+
+.notification-count{
+    position:absolute;
+    top:-6px;
+    right:-7px;
+    background:var(--red);
+    color:white;
+    width:15px;
+    height:15px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:9px;
+}
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:22px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+.page-title{
+    margin-bottom:18px;
+}
+
+.page-title h2{
+    font-size:20px;
+}
+
+.page-title p{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* ================= STATS ================= */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+    margin-bottom:18px;
+}
+
+.stat{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:16px;
+    cursor:pointer;
+    transition:.18s;
+}
+
+.stat:hover{
+    border-color:var(--blue);
+    transform:translateY(-2px);
+}
+
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+}
+
+.stat-icon{
+    font-size:22px;
+}
+
+.stat-number{
+    font-size:22px;
+    font-weight:bold;
+    margin-top:8px;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:3px;
+}
+
+/* ================= PANELS ================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:18px;
+}
+
+.panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:16px;
+    margin-bottom:18px;
+}
+
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:12px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border);
+}
+
+.panel-title{
+    font-size:14px;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+}
+
+th{
+    color:var(--muted);
+    text-align:left;
+    font-weight:normal;
+    padding:10px;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:11px 10px;
+    border-bottom:1px solid #273149;
+}
+
+tr:hover td{
+    background:rgba(255,255,255,.025);
+}
+
+.clickable{
+    cursor:pointer;
+    color:#60a5fa;
+}
+
+/* ================= BADGES ================= */
+
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:4px;
+    font-size:10px;
+    font-weight:bold;
+}
+
+.badge.blue{
+    color:#60a5fa;
+    background:rgba(59,130,246,.14);
+}
+
+.badge.green{
+    color:#34d399;
+    background:rgba(16,185,129,.14);
+}
+
+.badge.red{
+    color:#f87171;
+    background:rgba(239,68,68,.14);
+}
+
+.badge.yellow{
+    color:#fbbf24;
+    background:rgba(245,158,11,.14);
+}
+
+.badge.orange{
+    color:#fb923c;
+    background:rgba(249,115,22,.14);
+}
+
+/* ================= BUTTON ================= */
+
+.btn{
+    border:1px solid transparent;
+    background:#334155;
+    color:white;
+    border-radius:5px;
+    padding:8px 13px;
+    cursor:pointer;
+    font-size:11px;
+    transition:.18s;
+}
+
+.btn:hover{
+    filter:brightness(1.15);
+}
+
+.btn.primary{
+    background:var(--blue);
+}
+
+.btn.green{
+    background:var(--green);
+}
+
+.btn.red{
+    background:var(--red);
+}
+
+.btn.yellow{
+    background:var(--yellow);
+    color:#111;
+}
+
+.btn.outline{
+    background:transparent;
+    border-color:var(--border);
+}
+
+/* ================= FORM ================= */
+
+.search-bar{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+}
+
+.input,
+select,
+textarea{
+    width:100%;
+    background:#111827;
+    border:1px solid #334155;
+    color:white;
+    padding:9px 10px;
+    border-radius:5px;
+    outline:none;
+    font-size:12px;
+}
+
+.input:focus,
+select:focus,
+textarea:focus{
+    border-color:var(--blue);
+}
+
+textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:13px;
+}
+
+.form-group{
+    margin-bottom:13px;
+}
+
+.form-group label{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:5px;
+}
+
+.form-full{
+    grid-column:1/-1;
+}
+
+/* ================= DETAIL ================= */
+
+.detail-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.detail-item{
+    background:#111827;
+    border:1px solid var(--border);
+    padding:10px;
+    border-radius:5px;
+}
+
+.detail-item small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-bottom:4px;
+}
+
+.detail-item b{
+    font-size:12px;
+}
+
+/* ================= DUTY ================= */
+
+.duty-box{
+    background:#111827;
+    border:1px solid var(--border);
+    border-left:4px solid var(--green);
+    border-radius:7px;
+    padding:15px;
+}
+
+.duty-status{
+    color:var(--green);
+    font-weight:bold;
+    font-size:15px;
+}
+
+.duty-info{
+    color:var(--muted);
+    font-size:11px;
+    margin:7px 0 13px;
+}
+
+.duty-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(5px);
+    z-index:5000;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    width:720px;
+    max-width:92%;
+    max-height:88vh;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 20px 70px rgba(0,0,0,.7);
+}
+
+.modal-head{
+    padding:15px 18px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.modal-head h3{
+    font-size:15px;
+}
+
+.modal-close{
+    cursor:pointer;
+    color:var(--muted);
+    font-size:22px;
+}
+
+.modal-body{
+    padding:18px;
+    max-height:65vh;
+    overflow:auto;
+}
+
+.modal-foot{
+    padding:13px 18px;
+    border-top:1px solid var(--border);
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
+
+/* ================= NOTIFICATION ================= */
+
+.notification-panel{
+    position:fixed;
+    right:20px;
+    top:58px;
+    width:330px;
+    max-width:90%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    box-shadow:0 15px 50px rgba(0,0,0,.6);
+    display:none;
+    z-index:4000;
+}
+
+.notification-panel.show{
+    display:block;
+}
+
+.notification-item{
+    padding:12px;
+    border-bottom:1px solid var(--border);
+    font-size:11px;
+}
+
+.notification-item span{
+    color:var(--muted);
+    display:block;
+    margin-top:3px;
+}
+
+/* ================= EMPTY ================= */
+
+.empty{
+    color:var(--muted);
+    padding:25px;
+    text-align:center;
+    font-size:12px;
+}
+
+/* ================= COMPACT ================= */
+
+body.compact .content{
+    padding:12px;
+}
+
+body.compact .panel{
+    padding:11px;
+}
+
+body.compact .nav-item{
+    padding:8px 18px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+    .stats{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:800px){
+    .sidebar{
+        width:65px;
+    }
+
+    .logo-title,
+    .logo-sub,
+    .nav-title,
+    .nav-item span{
+        display:none;
+    }
+
+    .logo-area{
+        justify-content:center;
+        padding:0;
+    }
+
+    .nav-item{
+        justify-content:center;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .form-grid,
+    .detail-grid{
+        grid-template-columns:1fr;
+    }
+
+    .top-left{
+        display:none;
+    }
+
+    .search-bar{
+        flex-wrap:wrap;
+    }
+}
+</style>
 </head>
 
 <body>
 
-    <!-- =========================
-         登入畫面
-    ========================== -->
+<!-- ================= LOGIN ================= -->
 
-    <div id="loginScreen">
+<div id="login-screen">
 
-        <div class="login-box">
+    <div class="login-card">
 
-            <div class="login-logo">
-                <h1>STELLAR CAPITAL</h1>
-                <p>Department of Justice Roleplay</p>
-                <p style="margin-top:10px;">
-                    警務行動資訊管理系統 MDT
-                </p>
+        <div class="login-logo">🛡️</div>
+
+        <h1>Stellar Capital</h1>
+
+        <div class="subtitle">
+            DOJ RP 警務行動資料終端 MDT
+        </div>
+
+        <div class="login-error" id="login-error">
+            ⚠️ 警員編號或密碼錯誤
+        </div>
+
+        <div class="form-group" style="text-align:left">
+            <label>警員編號</label>
+            <input
+                class="input"
+                id="login-id"
+                placeholder="例如：1024"
+                autocomplete="username"
+            >
+        </div>
+
+        <div class="form-group" style="text-align:left">
+            <label>密碼</label>
+            <input
+                class="input"
+                type="password"
+                id="login-password"
+                placeholder="輸入密碼"
+                autocomplete="current-password"
+            >
+        </div>
+
+        <button
+            class="btn primary"
+            style="width:100%;padding:11px"
+            onclick="login()"
+        >
+            登入警務系統
+        </button>
+
+        <div class="demo-account">
+            測試帳號：1024 / 1234
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= APP ================= -->
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="logo-area">
+        <div class="logo-icon">🛡️</div>
+
+        <div>
+            <div class="logo-title">Stellar Capital</div>
+            <div class="logo-sub">DOJ RP MDT SYSTEM</div>
+        </div>
+    </div>
+
+    <div class="nav">
+
+        <div class="nav-item active" onclick="navigate('home',this)">
+            🏠 <span>首頁</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('people',this)">
+            👤 <span>人員查詢</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('vehicles',this)">
+            🚗 <span>車輛查詢</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('wanted',this)">
+            🔍 <span>通緝／協尋</span>
+        </div>
+
+        <div class="nav-title">勤務中心</div>
+
+        <div class="nav-item" onclick="navigate('cases',this)">
+            📋 <span>案件列表</span>
+        </div>
+
+        <div class="nav-item" onclick="openCaseModal()">
+            ➕ <span>建立案件</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('support',this)">
+            🚨 <span>支援請求</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('reports',this)">
+            📄 <span>案件報告</span>
+        </div>
+
+        <div class="nav-title">違規紀錄</div>
+
+        <div class="nav-item" onclick="navigate('violations',this)">
+            🚧 <span>交通違規</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('tickets',this)">
+            💳 <span>罰單管理</span>
+        </div>
+
+        <div class="nav-title">系統</div>
+
+        <div class="nav-item" onclick="navigate('logs',this)">
+            📜 <span>操作紀錄</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('settings',this)">
+            ⚙️ <span>系統設定</span>
+        </div>
+
+        <div class="nav-item" onclick="logout()">
+            🚪 <span>登出系統</span>
+        </div>
+
+    </div>
+
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="top-left">
+        <span id="clock">📅 載入中...</span>
+        <span id="weather">☁️ 天氣載入中...</span>
+    </div>
+
+    <div class="top-right">
+
+        <div
+            class="notification"
+            onclick="toggleNotifications()"
+        >
+            🔔
+            <div
+                class="notification-count"
+                id="notification-count"
+            >
+                0
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>警員名稱</label>
-                <input
-                    type="text"
-                    id="officerName"
-                    placeholder="請輸入警員名稱"
+        <div class="user">
+            <div class="dot"></div>
+            <span id="user-info">未登入</span>
+        </div>
+
+    </div>
+
+</header>
+
+<div class="content">
+
+<!-- ================= HOME ================= -->
+
+<section id="page-home" class="page active">
+
+    <div class="page-title">
+        <h2>勤務總覽</h2>
+        <p>Stellar Capital DOJ RP｜警務行動資料終端</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat" onclick="navigateById('people')">
+            <div class="stat-top">
+                <span class="stat-icon">👥</span>
+                <span class="badge green">ONLINE</span>
+            </div>
+            <div class="stat-number" id="stat-online">0</div>
+            <div class="stat-label">目前線上玩家</div>
+        </div>
+
+        <div class="stat" onclick="navigateById('cases')">
+            <div class="stat-top">
+                <span class="stat-icon">📋</span>
+                <span class="badge yellow">ACTIVE</span>
+            </div>
+            <div class="stat-number" id="stat-cases">0</div>
+            <div class="stat-label">待處理案件</div>
+        </div>
+
+        <div class="stat" onclick="navigateById('violations')">
+            <div class="stat-top">
+                <span class="stat-icon">🚧</span>
+                <span class="badge blue">TODAY</span>
+            </div>
+            <div class="stat-number" id="stat-violations">0</div>
+            <div class="stat-label">今日交通違規</div>
+        </div>
+
+        <div class="stat" onclick="navigateById('wanted')">
+            <div class="stat-top">
+                <span class="stat-icon">🚨</span>
+                <span class="badge red">WANTED</span>
+            </div>
+            <div class="stat-number" id="stat-wanted">0</div>
+            <div class="stat-label">通緝／協尋</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-top">
+                <span class="stat-icon">⏱️</span>
+                <span class="badge green">DUTY</span>
+            </div>
+            <div class="stat-number" id="duty-time">00:00</div>
+            <div class="stat-label">本次執勤時間</div>
+        </div>
+
+    </div>
+
+    <div class="grid">
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <div class="panel-title">📋 最新案件</div>
+
+                <button
+                    class="btn outline"
+                    onclick="navigateById('cases')"
                 >
+                    查看全部
+                </button>
             </div>
+
+            <div id="home-cases"></div>
+
+        </div>
+
+        <div>
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div class="panel-title">👮 我的勤務狀態</div>
+                </div>
+
+                <div class="duty-box">
+
+                    <div
+                        class="duty-status"
+                        id="duty-status"
+                    >
+                        10-8 在線執勤
+                    </div>
+
+                    <div
+                        class="duty-info"
+                        id="duty-info"
+                    >
+                        單位：-
+                    </div>
+
+                    <div class="duty-buttons">
+
+                        <button
+                            class="btn green"
+                            onclick="setDuty('10-8')"
+                        >
+                            10-8 在線
+                        </button>
+
+                        <button
+                            class="btn"
+                            onclick="setDuty('10-6')"
+                        >
+                            10-6 暫離
+                        </button>
+
+                        <button
+                            class="btn yellow"
+                            onclick="setDuty('10-23')"
+                        >
+                            10-23 到場
+                        </button>
+
+                        <button
+                            class="btn red"
+                            onclick="setDuty('10-7')"
+                        >
+                            10-7 下班
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div class="panel-title">🔔 最新通知</div>
+                </div>
+
+                <div id="home-notifications"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= PEOPLE ================= -->
+
+<section id="page-people" class="page">
+
+    <div class="page-title">
+        <h2>👤 人員查詢</h2>
+        <p>市民身分與案件資料庫</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="search-bar">
+
+            <input
+                class="input"
+                id="people-search"
+                placeholder="Roblox 名稱、Discord、身分證字號..."
+                onkeydown="if(event.key==='Enter')searchPeople()"
+            >
 
             <button
-                class="btn btn-primary"
-                style="width:100%;"
-                onclick="login()"
+                class="btn primary"
+                onclick="searchPeople()"
             >
-                登入 MDT 系統
+                🔎 搜尋
             </button>
 
         </div>
 
-    </div>
-
-
-    <!-- =========================
-         主系統
-    ========================== -->
-
-    <div id="app">
-
-        <aside class="sidebar">
-
-            <div class="sidebar-header">
-                <h2>STELLAR CAPITAL</h2>
-                <p>POLICE MDT SYSTEM</p>
-            </div>
-
-            <div class="nav">
-
-                <button
-                    class="nav-btn active"
-                    onclick="showPage('dashboard', this)"
-                >
-                    📊 <span>儀表板</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('personSearch', this)"
-                >
-                    🧍 <span>人員查詢</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('vehicleSearch', this)"
-                >
-                    🚗 <span>車輛查詢</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('warrantSearch', this)"
-                >
-                    🚨 <span>通緝／協尋</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('addPerson', this)"
-                >
-                    ➕ <span>新增人員</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('addVehicle', this)"
-                >
-                    🚙 <span>新增車輛</span>
-                </button>
-
-                <button
-                    class="nav-btn"
-                    onclick="showPage('addWarrant', this)"
-                >
-                    ⚠️ <span>新增通緝</span>
-                </button>
-
-            </div>
-
-            <div class="sidebar-footer">
-
-                <button
-                    class="logout-btn"
-                    onclick="logout()"
-                >
-                    🚪 <span>登出系統</span>
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <main class="main">
-
-            <header class="topbar">
-
-                <div class="topbar-title" id="pageTitle">
-                    儀表板
-                </div>
-
-                <div class="officer-info">
-                    👮 登入警員：
-                    <strong id="currentOfficer"></strong>
-                </div>
-
-            </header>
-
-
-            <div class="content">
-
-
-                <!-- =========================
-                     Dashboard
-                ========================== -->
-
-                <section
-                    class="page active"
-                    id="dashboard"
-                >
-
-                    <div class="stats-grid">
-
-                        <div class="stat-card">
-                            <h3>人員資料</h3>
-                            <div
-                                class="number"
-                                id="personCount"
-                            >
-                                --
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <h3>車輛資料</h3>
-                            <div
-                                class="number"
-                                id="vehicleCount"
-                            >
-                                --
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <h3>有效通緝／協尋</h3>
-                            <div
-                                class="number"
-                                id="warrantCount"
-                            >
-                                --
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <h2>系統狀態</h2>
-
-                        <p style="color:#94a3b8;">
-                            ● Google 試算表資料庫已連線
-                        </p>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     人員查詢
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="personSearch"
-                >
-
-                    <div class="panel">
-
-                        <h2>人員資料查詢</h2>
-
-                        <div class="search-row">
-
-                            <input
-                                type="text"
-                                id="personQuery"
-                                placeholder="輸入姓名、身分證字號或電話"
-                            >
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="searchPersons()"
-                            >
-                                搜尋
-                            </button>
-
-                        </div>
-
-                        <div class="table-wrapper">
-
-                            <table>
-
-                                <thead>
-                                    <tr>
-                                        <th>姓名</th>
-                                        <th>身分證字號</th>
-                                        <th>出生日期</th>
-                                        <th>電話</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody id="personResults">
-                                    <tr>
-                                        <td
-                                            colspan="5"
-                                            class="loading"
-                                        >
-                                            請輸入資料進行搜尋
-                                        </td>
-                                    </tr>
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     車輛查詢
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="vehicleSearch"
-                >
-
-                    <div class="panel">
-
-                        <h2>車輛資料查詢</h2>
-
-                        <div class="search-row">
-
-                            <input
-                                type="text"
-                                id="vehicleQuery"
-                                placeholder="輸入車牌、車主或車型"
-                            >
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="searchVehicles()"
-                            >
-                                搜尋
-                            </button>
-
-                        </div>
-
-                        <div class="table-wrapper">
-
-                            <table>
-
-                                <thead>
-                                    <tr>
-                                        <th>車牌</th>
-                                        <th>車主</th>
-                                        <th>車型</th>
-                                        <th>顏色</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody id="vehicleResults">
-
-                                    <tr>
-                                        <td
-                                            colspan="5"
-                                            class="loading"
-                                        >
-                                            請輸入資料進行搜尋
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     通緝
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="warrantSearch"
-                >
-
-                    <div class="panel">
-
-                        <h2>通緝／協尋查詢</h2>
-
-                        <div class="search-row">
-
-                            <input
-                                type="text"
-                                id="warrantQuery"
-                                placeholder="輸入姓名、案件編號或身分證字號"
-                            >
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="searchWarrants()"
-                            >
-                                搜尋
-                            </button>
-
-                        </div>
-
-                        <div class="table-wrapper">
-
-                            <table>
-
-                                <thead>
-                                    <tr>
-                                        <th>案件編號</th>
-                                        <th>姓名</th>
-                                        <th>類型</th>
-                                        <th>原因</th>
-                                        <th>狀態</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody id="warrantResults">
-
-                                    <tr>
-                                        <td
-                                            colspan="6"
-                                            class="loading"
-                                        >
-                                            請輸入資料進行搜尋
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     新增人員
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="addPerson"
-                >
-
-                    <div class="panel">
-
-                        <h2>新增人員資料</h2>
-
-                        <form
-                            id="personForm"
-                            onsubmit="addPerson(event)"
-                        >
-
-                            <div class="form-grid">
-
-                                <div class="form-group">
-                                    <label>姓名</label>
-
-                                    <input
-                                        id="personName"
-                                        required
-                                    >
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>身分證字號</label>
-
-                                    <input
-                                        id="personId"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>出生日期</label>
-
-                                    <input
-                                        type="date"
-                                        id="personBirth"
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>性別</label>
-
-                                    <select id="personGender">
-
-                                        <option value="男">
-                                            男
-                                        </option>
-
-                                        <option value="女">
-                                            女
-                                        </option>
-
-                                        <option value="其他">
-                                            其他
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>電話</label>
-
-                                    <input id="personPhone">
-
-                                </div>
-
-                            </div>
-
-
-                            <button
-                                class="btn btn-success"
-                                type="submit"
-                            >
-                                儲存人員資料
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     新增車輛
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="addVehicle"
-                >
-
-                    <div class="panel">
-
-                        <h2>新增車輛資料</h2>
-
-                        <form
-                            id="vehicleForm"
-                            onsubmit="addVehicle(event)"
-                        >
-
-                            <div class="form-grid">
-
-                                <div class="form-group">
-
-                                    <label>車牌號碼</label>
-
-                                    <input
-                                        id="vehiclePlate"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>車主</label>
-
-                                    <input
-                                        id="vehicleOwner"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>車型</label>
-
-                                    <input
-                                        id="vehicleModel"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>顏色</label>
-
-                                    <input id="vehicleColor">
-
-                                </div>
-
-                            </div>
-
-
-                            <button
-                                class="btn btn-success"
-                                type="submit"
-                            >
-                                儲存車輛資料
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =========================
-                     新增通緝
-                ========================== -->
-
-                <section
-                    class="page"
-                    id="addWarrant"
-                >
-
-                    <div class="panel">
-
-                        <h2>新增通緝／協尋案件</h2>
-
-                        <form
-                            id="warrantForm"
-                            onsubmit="addWarrant(event)"
-                        >
-
-                            <div class="form-grid">
-
-                                <div class="form-group">
-
-                                    <label>案件編號</label>
-
-                                    <input
-                                        id="warrantCaseId"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>姓名</label>
-
-                                    <input
-                                        id="warrantName"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>身分證字號</label>
-
-                                    <input id="warrantPersonId">
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>類型</label>
-
-                                    <select id="warrantType">
-
-                                        <option value="通緝">
-                                            通緝
-                                        </option>
-
-                                        <option value="協尋">
-                                            協尋
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>原因／案件內容</label>
-
-                                <textarea
-                                    id="warrantReason"
-                                    required
-                                ></textarea>
-
-                            </div>
-
-
-                            <button
-                                class="btn btn-danger"
-                                type="submit"
-                            >
-                                發布案件
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-        </main>
+        <div id="people-results">
+            <div class="empty">請輸入搜尋條件。</div>
+        </div>
 
     </div>
 
+</section>
 
-    <!-- =========================
-         詳細資料視窗
-    ========================== -->
+<!-- ================= VEHICLES ================= -->
 
-    <div
-        class="modal"
-        id="detailModal"
-    >
+<section id="page-vehicles" class="page">
 
-        <div class="modal-content">
+    <div class="page-title">
+        <h2>🚗 車輛查詢</h2>
+        <p>車輛登記與車牌資料庫</p>
+    </div>
 
-            <div class="modal-header">
+    <div class="panel">
 
-                <h2 id="modalTitle">
-                    詳細資料
-                </h2>
+        <div class="search-bar">
 
-                <button
-                    class="close-btn"
-                    onclick="closeModal()"
-                >
-                    ×
-                </button>
+            <input
+                class="input"
+                id="vehicle-search"
+                placeholder="輸入車牌、車主或車型..."
+                onkeydown="if(event.key==='Enter')searchVehicles()"
+            >
 
+            <button
+                class="btn primary"
+                onclick="searchVehicles()"
+            >
+                🔎 搜尋
+            </button>
+
+        </div>
+
+        <div id="vehicle-results">
+            <div class="empty">請輸入搜尋條件。</div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= WANTED ================= -->
+
+<section id="page-wanted" class="page">
+
+    <div class="page-title">
+        <h2>🔍 通緝／協尋</h2>
+        <p>通緝人員與涉案車輛資料庫</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="search-bar">
+
+            <input
+                class="input"
+                id="wanted-search"
+                placeholder="姓名、Roblox、身分證、車牌..."
+                onkeydown="if(event.key==='Enter')searchWanted()"
+            >
+
+            <button
+                class="btn primary"
+                onclick="searchWanted()"
+            >
+                🔎 搜尋
+            </button>
+
+            <button
+                class="btn red"
+                onclick="openWantedModal()"
+            >
+                ➕ 新增通緝
+            </button>
+
+        </div>
+
+        <div id="wanted-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= CASES ================= -->
+
+<section id="page-cases" class="page">
+
+    <div class="page-title">
+        <h2>📋 案件列表</h2>
+        <p>所有勤務案件管理</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="search-bar">
+
+            <input
+                class="input"
+                id="case-search"
+                placeholder="搜尋案件編號、類型、地點..."
+                oninput="renderCases()"
+            >
+
+            <select
+                id="case-filter"
+                onchange="renderCases()"
+            >
+                <option value="">全部狀態</option>
+                <option value="待處理">待處理</option>
+                <option value="處理中">處理中</option>
+                <option value="已結案">已結案</option>
+            </select>
+
+            <button
+                class="btn primary"
+                onclick="openCaseModal()"
+            >
+                ➕ 建立案件
+            </button>
+
+        </div>
+
+        <div id="case-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= SUPPORT ================= -->
+
+<section id="page-support" class="page">
+
+    <div class="page-title">
+        <h2>🚨 支援請求</h2>
+        <p>即時警力支援與勤務派遣</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">目前支援請求</div>
+
+            <button
+                class="btn red"
+                onclick="openSupportModal()"
+            >
+                ➕ 發布支援請求
+            </button>
+
+        </div>
+
+        <div id="support-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= REPORTS ================= -->
+
+<section id="page-reports" class="page">
+
+    <div class="page-title">
+        <h2>📄 案件報告</h2>
+        <p>勤務報告與筆錄管理</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">報告列表</div>
+
+            <button
+                class="btn primary"
+                onclick="openReportModal()"
+            >
+                ➕ 新增報告
+            </button>
+
+        </div>
+
+        <div id="report-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= VIOLATIONS ================= -->
+
+<section id="page-violations" class="page">
+
+    <div class="page-title">
+        <h2>🚧 交通違規</h2>
+        <p>交通違規資料建檔</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">違規紀錄</div>
+
+            <button
+                class="btn primary"
+                onclick="openViolationModal()"
+            >
+                ➕ 建立違規
+            </button>
+
+        </div>
+
+        <div id="violation-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= TICKETS ================= -->
+
+<section id="page-tickets" class="page">
+
+    <div class="page-title">
+        <h2>💳 罰單管理</h2>
+        <p>交通罰單與繳費狀態</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">罰單列表</div>
+
+            <button
+                class="btn primary"
+                onclick="openTicketModal()"
+            >
+                ➕ 開立罰單
+            </button>
+
+        </div>
+
+        <div id="ticket-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= LOGS ================= -->
+
+<section id="page-logs" class="page">
+
+    <div class="page-title">
+        <h2>📜 操作紀錄</h2>
+        <p>MDT 系統操作 Log</p>
+    </div>
+
+    <div class="panel">
+
+        <div id="log-results"></div>
+
+    </div>
+
+</section>
+
+<!-- ================= SETTINGS ================= -->
+
+<section id="page-settings" class="page">
+
+    <div class="page-title">
+        <h2>⚙️ 系統設定</h2>
+        <p>帳戶與 MDT 設定</p>
+    </div>
+
+    <div class="panel">
+
+        <div class="panel-title" style="margin-bottom:15px">
+            👤 帳戶資訊
+        </div>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <small>警員姓名</small>
+                <b id="setting-name">-</b>
             </div>
 
-            <div id="modalBody"></div>
+            <div class="detail-item">
+                <small>警員編號</small>
+                <b id="setting-id">-</b>
+            </div>
+
+            <div class="detail-item">
+                <small>所屬單位</small>
+                <b id="setting-dept">-</b>
+            </div>
+
+            <div class="detail-item">
+                <small>職階</small>
+                <b id="setting-rank">-</b>
+            </div>
 
         </div>
 
     </div>
 
+    <div class="panel">
 
-    <!-- =========================
-         Toast
-    ========================== -->
+        <div class="panel-title" style="margin-bottom:15px">
+            🖥️ MDT 顯示設定
+        </div>
 
-    <div id="toast"></div>
+        <button
+            class="btn"
+            onclick="toggleCompact()"
+        >
+            切換緊湊模式
+        </button>
 
+        <button
+            class="btn red"
+            onclick="clearLocalData()"
+        >
+            清除本機測試資料
+        </button>
 
-    <script>
+    </div>
 
-        /* =========================
-           API 設定
-        ========================== */
+</section>
 
-        const API_URL =
-            "https://script.google.com/macros/s/AKfycbx8bilTXc_KJaJSAmwrxUQo8q37jsuQLJAaN6gJSL5EmSibTuJGM8siLF4aM9c3F9x0aQ/exec";
+</div>
+</main>
+</div>
 
+<!-- ================= NOTIFICATIONS ================= -->
 
-        /* =========================
-           系統變數
-        ========================== */
+<div
+    class="notification-panel"
+    id="notification-panel"
+>
+    <div class="panel-header" style="padding:12px;margin:0">
+        <div class="panel-title">🔔 通知中心</div>
+    </div>
 
-        let currentOfficerName = "";
+    <div id="notification-list"></div>
+</div>
 
+<!-- ================= MODAL ================= -->
 
-        /* =========================
-           登入
-        ========================== */
+<div class="modal" id="modal">
 
-        function login() {
+    <div class="modal-box">
 
-            const name =
-                document
-                    .getElementById("officerName")
-                    .value
-                    .trim();
+        <div class="modal-head">
 
-            if (!name) {
+            <h3 id="modal-title">視窗</h3>
 
-                showToast(
-                    "請輸入警員名稱"
-                );
+            <div
+                class="modal-close"
+                onclick="closeModal()"
+            >
+                ×
+            </div>
 
-                return;
+        </div>
 
-            }
+        <div
+            class="modal-body"
+            id="modal-body"
+        ></div>
 
-            currentOfficerName = name;
+        <div
+            class="modal-foot"
+            id="modal-foot"
+        ></div>
 
-            document
-                .getElementById("currentOfficer")
-                .textContent = name;
+    </div>
 
-            document
-                .getElementById("loginScreen")
-                .style.display = "none";
+</div>
 
-            document
-                .getElementById("app")
-                .style.display = "block";
+<script>
+"use strict";
 
-            loadDashboard();
+/* =========================================================
+   DATABASE
+========================================================= */
 
+const policeDatabase = {
+    "1024":{
+        name:"林志宇",
+        id:"#1024",
+        dept:"巡邏組",
+        pwd:"1234",
+        rank:"警員"
+    },
+    "1001":{
+        name:"張志明",
+        id:"#1001",
+        dept:"交通組",
+        pwd:"1234",
+        rank:"警員"
+    },
+    "1007":{
+        name:"李承翰",
+        id:"#1007",
+        dept:"偵查組",
+        pwd:"1234",
+        rank:"警員"
+    },
+    "1022":{
+        name:"陳柏任",
+        id:"#1022",
+        dept:"SWAT",
+        pwd:"1234",
+        rank:"警員"
+    }
+};
+
+let people = [
+    {
+        id:"2654310823",
+        roblox:"younger132",
+        dc:"陽",
+        age:17,
+        job:"警察",
+        wanted:false,
+        record:"無",
+        license:"有效",
+        insurance:"有"
+    },
+    {
+        id:"2772426897",
+        roblox:"hjk33",
+        dc:"羅魯承",
+        age:18,
+        job:"消防",
+        wanted:false,
+        record:"無",
+        license:"有效",
+        insurance:"有"
+    },
+    {
+        id:"4775123066",
+        roblox:"hygyuggcy",
+        dc:"王小翰",
+        age:14,
+        job:"市民",
+        wanted:true,
+        wantedReason:"涉嫌強盜、拒捕逃逸",
+        record:"強盜前科",
+        license:"無",
+        insurance:"無"
+    },
+    {
+        id:"3955795459",
+        roblox:"blliy100122",
+        dc:"比利",
+        age:25,
+        job:"市民",
+        wanted:true,
+        wantedReason:"持械恐嚇、妨害公務",
+        record:"妨害公務",
+        license:"有效",
+        insurance:"有"
+    },
+    {
+        id:"4366713816",
+        roblox:"ryder981215",
+        dc:"老鼠",
+        age:16,
+        job:"市民",
+        wanted:false,
+        record:"無",
+        license:"有效",
+        insurance:"有"
+    },
+    {
+        id:"7557673020",
+        roblox:"Taiwan_1268",
+        dc:"pop_6cat_03909LON",
+        age:22,
+        job:"市民",
+        wanted:false,
+        record:"無",
+        license:"有效",
+        insurance:"有"
+    }
+];
+
+let vehicles = [
+    {
+        plate:"AHE-6616",
+        ownerId:"2654310823",
+        owner:"younger132",
+        model:"Tesla Motors",
+        color:"黑色",
+        insurance:"有",
+        illegal:false,
+        violations:"無"
+    },
+    {
+        plate:"ABC-123",
+        ownerId:"2772426897",
+        owner:"hjk33",
+        model:"Navara Horizon",
+        color:"螢光綠",
+        insurance:"有",
+        illegal:false,
+        violations:"無"
+    },
+    {
+        plate:"TWC-1215",
+        ownerId:"4366713816",
+        owner:"ryder981215",
+        model:"Antelope",
+        color:"藍色",
+        insurance:"有",
+        illegal:false,
+        violations:"無"
+    },
+    {
+        plate:"NVI-100",
+        ownerId:"7557673020",
+        owner:"Taiwan_1268",
+        model:"CORBETA",
+        color:"黑色",
+        insurance:"有",
+        illegal:true,
+        violations:"涉嫌重大刑案車輛協尋"
+    }
+];
+
+let cases = [
+    {
+        id:"#0012",
+        name:"市區追逐案件",
+        type:"刑案",
+        location:"Downtown",
+        person:"王小翰",
+        status:"待處理",
+        priority:"高",
+        time:"14:31",
+        description:"疑似嫌犯拒絕警方攔查並逃逸。"
+    },
+    {
+        id:"#0011",
+        name:"高速公路交通事故",
+        type:"交通事故",
+        location:"Highway",
+        person:"未知",
+        status:"處理中",
+        priority:"中",
+        time:"14:28",
+        description:"兩車發生碰撞。"
+    }
+];
+
+let supports = [];
+
+let reports = [];
+
+let violations = [
+    {
+        id:"V-001",
+        person:"陽",
+        plate:"AHE-6616",
+        type:"超速",
+        location:"Downtown",
+        officer:"林志宇",
+        time:"今日"
+    }
+];
+
+let tickets = [
+    {
+        id:"T-001",
+        person:"陽",
+        plate:"AHE-6616",
+        reason:"超速",
+        amount:3000,
+        status:"未繳",
+        officer:"林志宇"
+    }
+];
+
+let logs = [];
+
+let notifications = [
+    {
+        title:"大型追逐案件",
+        text:"Downtown 目前需要附近單位支援。",
+        time:"剛剛"
+    },
+    {
+        title:"新通緝資料",
+        text:"系統新增一筆通緝資料。",
+        time:"5 分鐘前"
+    },
+    {
+        title:"勤務公告",
+        text:"今日 RP 預計於 22:00 結束。",
+        time:"10 分鐘前"
+    }
+];
+
+let currentUser = null;
+let dutyStart = null;
+let dutyInterval = null;
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function saveData(){
+    localStorage.setItem("mdt_cases",JSON.stringify(cases));
+    localStorage.setItem("mdt_supports",JSON.stringify(supports));
+    localStorage.setItem("mdt_reports",JSON.stringify(reports));
+    localStorage.setItem("mdt_violations",JSON.stringify(violations));
+    localStorage.setItem("mdt_tickets",JSON.stringify(tickets));
+    localStorage.setItem("mdt_logs",JSON.stringify(logs));
+    localStorage.setItem("mdt_people",JSON.stringify(people));
+    localStorage.setItem("mdt_vehicles",JSON.stringify(vehicles));
+}
+
+function loadData(){
+    try{
+        const storedCases = localStorage.getItem("mdt_cases");
+        const storedSupports = localStorage.getItem("mdt_supports");
+        const storedReports = localStorage.getItem("mdt_reports");
+        const storedViolations = localStorage.getItem("mdt_violations");
+        const storedTickets = localStorage.getItem("mdt_tickets");
+        const storedLogs = localStorage.getItem("mdt_logs");
+        const storedPeople = localStorage.getItem("mdt_people");
+        const storedVehicles = localStorage.getItem("mdt_vehicles");
+
+        if(storedCases) cases = JSON.parse(storedCases);
+        if(storedSupports) supports = JSON.parse(storedSupports);
+        if(storedReports) reports = JSON.parse(storedReports);
+        if(storedViolations) violations = JSON.parse(storedViolations);
+        if(storedTickets) tickets = JSON.parse(storedTickets);
+        if(storedLogs) logs = JSON.parse(storedLogs);
+        if(storedPeople) people = JSON.parse(storedPeople);
+        if(storedVehicles) vehicles = JSON.parse(storedVehicles);
+
+    }catch(error){
+        console.error("MDT 資料載入失敗:",error);
+    }
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function login(){
+
+    const id = document
+        .getElementById("login-id")
+        .value
+        .trim();
+
+    const pwd = document
+        .getElementById("login-password")
+        .value
+        .trim();
+
+    const errorBox = document.getElementById("login-error");
+
+    if(
+        !policeDatabase[id] ||
+        policeDatabase[id].pwd !== pwd
+    ){
+        errorBox.style.display = "block";
+        return;
+    }
+
+    errorBox.style.display = "none";
+
+    currentUser = policeDatabase[id];
+
+    localStorage.setItem("mdt_login",id);
+
+    document.getElementById("login-screen")
+        .style.display = "none";
+
+    init();
+}
+
+function logout(){
+
+    if(!confirm("確定要登出 MDT 系統嗎？")){
+        return;
+    }
+
+    if(currentUser){
+        addLog("登出系統");
+    }
+
+    localStorage.removeItem("mdt_login");
+
+    currentUser = null;
+
+    location.reload();
+}
+
+/* Enter 登入 */
+
+document.addEventListener("keydown",function(event){
+
+    if(
+        event.key === "Enter" &&
+        document.getElementById("login-screen")
+            .style.display !== "none"
+    ){
+        login();
+    }
+
+});
+
+/* =========================================================
+   INIT
+========================================================= */
+
+function init(){
+
+    loadData();
+
+    if(!currentUser){
+        return;
+    }
+
+    document.getElementById("user-info").innerText =
+        `${currentUser.name} ${currentUser.id}｜${currentUser.dept}`;
+
+    document.getElementById("setting-name").innerText =
+        currentUser.name;
+
+    document.getElementById("setting-id").innerText =
+        currentUser.id;
+
+    document.getElementById("setting-dept").innerText =
+        currentUser.dept;
+
+    document.getElementById("setting-rank").innerText =
+        currentUser.rank;
+
+    renderAll();
+
+    setDuty("10-8");
+
+    addLog("登入系統");
+}
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function navigate(id,element){
+
+    document.querySelectorAll(".page")
+        .forEach(pageElement=>{
+            pageElement.classList.remove("active");
+        });
+
+    const target =
+        document.getElementById("page-"+id);
+
+    if(target){
+        target.classList.add("active");
+    }
+
+    document.querySelectorAll(".nav-item")
+        .forEach(navElement=>{
+            navElement.classList.remove("active");
+        });
+
+    if(element){
+        element.classList.add("active");
+    }
+
+    renderAll();
+}
+
+function navigateById(id){
+
+    const map = {
+        home:"首頁",
+        people:"人員查詢",
+        vehicles:"車輛查詢",
+        wanted:"通緝",
+        cases:"案件列表",
+        support:"支援",
+        reports:"案件報告",
+        violations:"交通違規",
+        tickets:"罰單管理",
+        logs:"操作紀錄",
+        settings:"系統設定"
+    };
+
+    const targetText = map[id];
+
+    const navItems =
+        [...document.querySelectorAll(".nav-item")];
+
+    const targetNav =
+        navItems.find(item =>
+            item.innerText.includes(targetText)
+        );
+
+    navigate(id,targetNav);
+}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function renderHome(){
+
+    document.getElementById("stat-online").innerText =
+        people.length + 18;
+
+    document.getElementById("stat-cases").innerText =
+        cases.filter(item =>
+            item.status !== "已結案"
+        ).length;
+
+    document.getElementById("stat-violations").innerText =
+        violations.length;
+
+    document.getElementById("stat-wanted").innerText =
+        people.filter(item=>item.wanted).length +
+        vehicles.filter(item=>item.illegal).length;
+
+    const recentCases = cases.slice(0,5);
+
+    if(!recentCases.length){
+
+        document.getElementById("home-cases").innerHTML =
+            `<div class="empty">目前沒有案件</div>`;
+
+    }else{
+
+        document.getElementById("home-cases").innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>編號</th>
+                    <th>案件</th>
+                    <th>地點</th>
+                    <th>時間</th>
+                    <th>狀態</th>
+                    <th>優先度</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                ${recentCases.map(item=>`
+
+                    <tr
+                        onclick="showCase('${item.id}')"
+                        style="cursor:pointer"
+                    >
+
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.location}</td>
+                        <td>${item.time}</td>
+
+                        <td>
+                            <span class="badge ${
+                                item.status==="待處理"
+                                ?"yellow":
+                                item.status==="處理中"
+                                ?"blue":"green"
+                            }">
+                                ${item.status}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="badge ${
+                                item.priority==="高"
+                                ?"red":
+                                item.priority==="中"
+                                ?"yellow":"green"
+                            }">
+                                ${item.priority}
+                            </span>
+                        </td>
+
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+        </table>`;
+    }
+}
+
+function renderNotifications(){
+
+    const notificationHTML = notifications.map(item=>`
+
+        <div class="notification-item">
+
+            <b>${item.title}</b>
+
+            <span>${item.text}</span>
+
+            <span>${item.time}</span>
+
+        </div>
+
+    `).join("");
+
+    document.getElementById("home-notifications")
+        .innerHTML =
+        notificationHTML ||
+        `<div class="empty">目前沒有通知</div>`;
+
+    document.getElementById("notification-list")
+        .innerHTML =
+        notificationHTML ||
+        `<div class="empty">目前沒有通知</div>`;
+
+    document.getElementById("notification-count").innerText =
+        Math.min(notifications.length,99);
+}
+
+/* =========================================================
+   PEOPLE
+========================================================= */
+
+function searchPeople(){
+
+    const key =
+        document.getElementById("people-search")
+        .value
+        .trim()
+        .toLowerCase();
+
+    if(!key){
+
+        document.getElementById("people-results").innerHTML =
+            `<div class="empty">請輸入搜尋關鍵字。</div>`;
+
+        return;
+    }
+
+    const result = people.filter(person =>
+        person.id.toLowerCase().includes(key) ||
+        person.roblox.toLowerCase().includes(key) ||
+        person.dc.toLowerCase().includes(key) ||
+        person.job.toLowerCase().includes(key)
+    );
+
+    if(!result.length){
+
+        document.getElementById("people-results").innerHTML =
+            `<div class="empty">查無此人員。</div>`;
+
+        return;
+    }
+
+    document.getElementById("people-results").innerHTML =
+        result.map(person=>`
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    👤 <b>${person.dc}</b>
+                    <span style="color:var(--muted)">
+                        Roblox：${person.roblox}
+                    </span>
+                </div>
+
+                <span class="badge ${
+                    person.wanted
+                    ?"red":"green"
+                }">
+                    ${
+                        person.wanted
+                        ?"⚠️ 通緝中"
+                        :"正常"
+                    }
+                </span>
+
+            </div>
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+                    <small>身分證</small>
+                    <b>${person.id}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>年齡</small>
+                    <b>${person.age}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>職業</small>
+                    <b>${person.job}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>駕照</small>
+                    <b>${person.license}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>保險</small>
+                    <b>${person.insurance}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>紀錄</small>
+                    <b>${person.record}</b>
+                </div>
+
+            </div>
+
+            <div style="margin-top:12px">
+
+                <button
+                    class="btn primary"
+                    onclick="showPerson('${person.id}')"
+                >
+                    查看完整資料
+                </button>
+
+            </div>
+
+        </div>
+
+    `).join("");
+}
+
+/* =========================================================
+   PERSON DETAIL
+========================================================= */
+
+function showPerson(id){
+
+    const person =
+        people.find(item=>item.id===id);
+
+    if(!person){
+        return;
+    }
+
+    const personVehicles =
+        vehicles.filter(item=>item.ownerId===id);
+
+    const personCases =
+        cases.filter(item =>
+            String(item.person || "")
+                .includes(person.dc)
+        );
+
+    const personTickets =
+        tickets.filter(item =>
+            String(item.person || "")
+                .includes(person.dc)
+        );
+
+    openModal(
+        "👤 人員詳細資料",
+
+        `
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <small>姓名</small>
+                <b>${person.dc}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>Roblox</small>
+                <b>${person.roblox}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>身分證</small>
+                <b>${person.id}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>年齡</small>
+                <b>${person.age}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>職業</small>
+                <b>${person.job}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>通緝狀態</small>
+                <b>
+                    ${person.wanted
+                    ?"⚠️ 通緝中"
+                    :"正常"}
+                </b>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="panel-title">
+            🚗 名下車輛
+        </div>
+
+        <br>
+
+        ${
+            personVehicles.length
+            ?
+            personVehicles.map(vehicle=>`
+                <div
+                    class="detail-item"
+                    style="margin-bottom:6px"
+                >
+                    🚗 ${vehicle.plate}
+                    ｜${vehicle.model}
+                    ｜${vehicle.color}
+                </div>
+            `).join("")
+            :
+            `<span style="color:var(--muted)">
+                無登記車輛
+            </span>`
         }
 
+        <br><br>
 
-        /* =========================
-           登出
-        ========================== */
+        <div class="panel-title">
+            📋 涉及案件
+        </div>
 
-        function logout() {
+        <br>
 
-            currentOfficerName = "";
-
-            document
-                .getElementById("app")
-                .style.display = "none";
-
-            document
-                .getElementById("loginScreen")
-                .style.display = "flex";
-
-            document
-                .getElementById("officerName")
-                .value = "";
-
+        ${
+            personCases.length
+            ?
+            personCases.map(item=>`
+                <div
+                    class="detail-item"
+                    style="margin-bottom:6px"
+                >
+                    ${item.id}
+                    ｜${item.name}
+                    ｜${item.status}
+                </div>
+            `).join("")
+            :
+            `<span style="color:var(--muted)">
+                無案件紀錄
+            </span>`
         }
 
+        <br><br>
 
-        /* =========================
-           頁面切換
-        ========================== */
+        <div class="panel-title">
+            💳 罰單
+        </div>
 
-        function showPage(pageId, button) {
+        <br>
 
-            document
-                .querySelectorAll(".page")
-                .forEach(function(page) {
-
-                    page.classList.remove("active");
-
-                });
-
-            document
-                .getElementById(pageId)
-                .classList.add("active");
-
-
-            document
-                .querySelectorAll(".nav-btn")
-                .forEach(function(navButton) {
-
-                    navButton.classList.remove("active");
-
-                });
-
-
-            if (button) {
-
-                button.classList.add("active");
-
-            }
-
-
-            const titles = {
-
-                dashboard:
-                    "儀表板",
-
-                personSearch:
-                    "人員查詢",
-
-                vehicleSearch:
-                    "車輛查詢",
-
-                warrantSearch:
-                    "通緝／協尋查詢",
-
-                addPerson:
-                    "新增人員",
-
-                addVehicle:
-                    "新增車輛",
-
-                addWarrant:
-                    "新增通緝／協尋"
-
-            };
-
-
-            document
-                .getElementById("pageTitle")
-                .textContent =
-                    titles[pageId] || "MDT 系統";
-
+        ${
+            personTickets.length
+            ?
+            personTickets.map(ticket=>`
+                <div
+                    class="detail-item"
+                    style="margin-bottom:6px"
+                >
+                    ${ticket.id}
+                    ｜${ticket.reason}
+                    ｜$${ticket.amount}
+                    ｜${ticket.status}
+                </div>
+            `).join("")
+            :
+            `<span style="color:var(--muted)">
+                無罰單
+            </span>`
         }
 
+        ${
+            person.wanted
+            ?
+            `
+            <br><br>
 
-        /* =========================
-           API 呼叫
-        ========================== */
-
-        async function apiRequest(data) {
-
-            try {
-
-                const response =
-                    await fetch(API_URL, {
-
-                        method: "POST",
-
-                        headers: {
-
-                            "Content-Type":
-                                "text/plain;charset=utf-8"
-
-                        },
-
-                        body:
-                            JSON.stringify(data)
-
-                    });
-
-
-                const result =
-                    await response.json();
-
-
-                return result;
-
-            }
-
-            catch (error) {
-
-                console.error(error);
-
-                showToast(
-                    "無法連線至 Google 試算表"
-                );
-
-                return {
-
-                    success: false
-
-                };
-
-            }
-
+            <div style="
+                background:rgba(239,68,68,.1);
+                border:1px solid var(--red);
+                padding:12px;
+                border-radius:6px;
+                color:#f87171
+            ">
+                ⚠️ 通緝事由：
+                ${person.wantedReason}
+            </div>
+            `
+            :""
         }
+        `,
 
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            關閉
+        </button>
+        `
+    );
+}
 
-        /* =========================
-           Dashboard
-        ========================== */
+/* =========================================================
+   VEHICLES
+========================================================= */
 
-        async function loadDashboard() {
+function searchVehicles(){
 
-            const result =
-                await apiRequest({
+    const key =
+        document.getElementById("vehicle-search")
+        .value
+        .trim()
+        .toLowerCase();
 
-                    action:
-                        "dashboard"
+    if(!key){
 
-                });
+        document.getElementById("vehicle-results").innerHTML =
+            `<div class="empty">請輸入搜尋關鍵字。</div>`;
 
+        return;
+    }
 
-            if (
-                result &&
-                result.success
-            ) {
+    const result = vehicles.filter(vehicle =>
+        vehicle.plate.toLowerCase().includes(key) ||
+        vehicle.owner.toLowerCase().includes(key) ||
+        vehicle.model.toLowerCase().includes(key)
+    );
 
-                document
-                    .getElementById("personCount")
-                    .textContent =
-                        result.personCount ?? 0;
+    if(!result.length){
 
+        document.getElementById("vehicle-results").innerHTML =
+            `<div class="empty">查無車輛資料。</div>`;
 
-                document
-                    .getElementById("vehicleCount")
-                    .textContent =
-                        result.vehicleCount ?? 0;
+        return;
+    }
 
+    document.getElementById("vehicle-results").innerHTML =
+        result.map(vehicle=>`
 
-                document
-                    .getElementById("warrantCount")
-                    .textContent =
-                        result.warrantCount ?? 0;
+        <div class="panel">
 
-            }
+            <div class="panel-header">
 
-        }
+                <div>
+                    🚗 <b>${vehicle.plate}</b>
+                    ｜${vehicle.model}
+                </div>
 
+                <span class="badge ${
+                    vehicle.illegal
+                    ?"red":"green"
+                }">
+                    ${
+                        vehicle.illegal
+                        ?"⚠️ 協尋"
+                        :"正常"
+                    }
+                </span>
 
-        /* =========================
-           人員搜尋
-        ========================== */
+            </div>
 
-        async function searchPersons() {
+            <div class="detail-grid">
 
-            const query =
-                document
-                    .getElementById("personQuery")
-                    .value
-                    .trim();
+                <div class="detail-item">
+                    <small>車牌</small>
+                    <b>${vehicle.plate}</b>
+                </div>
 
+                <div class="detail-item">
+                    <small>車主</small>
+                    <b>${vehicle.owner}</b>
+                </div>
 
-            const resultBox =
-                document
-                    .getElementById("personResults");
+                <div class="detail-item">
+                    <small>車型</small>
+                    <b>${vehicle.model}</b>
+                </div>
 
+                <div class="detail-item">
+                    <small>顏色</small>
+                    <b>${vehicle.color}</b>
+                </div>
 
-            resultBox.innerHTML =
-                '<tr><td colspan="5" class="loading">搜尋中...</td></tr>';
+                <div class="detail-item">
+                    <small>保險</small>
+                    <b>${vehicle.insurance}</b>
+                </div>
 
+                <div class="detail-item">
+                    <small>違規</small>
+                    <b>${vehicle.violations}</b>
+                </div>
 
-            const result =
-                await apiRequest({
+            </div>
 
-                    action:
-                        "searchPerson",
+            <br>
 
-                    query:
-                        query
+            <button
+                class="btn primary"
+                onclick="showVehicle('${vehicle.plate}')"
+            >
+                查看完整資料
+            </button>
 
-                });
+            <button
+                class="btn"
+                onclick="showPerson('${vehicle.ownerId}')"
+            >
+                查看車主
+            </button>
 
+        </div>
 
-            if (
-                !result ||
-                !result.success
-            ) {
+    `).join("");
+}
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="5" class="loading">查詢失敗</td></tr>';
+function showVehicle(plate){
 
-                return;
+    const vehicle =
+        vehicles.find(item=>item.plate===plate);
 
-            }
+    if(!vehicle){
+        return;
+    }
 
+    const owner =
+        people.find(item=>item.id===vehicle.ownerId);
 
-            const data =
-                result.data || [];
+    openModal(
+        "🚗 車輛詳細資料",
 
+        `
+        <div class="detail-grid">
 
-            if (
-                data.length === 0
-            ) {
+            <div class="detail-item">
+                <small>車牌</small>
+                <b>${vehicle.plate}</b>
+            </div>
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="5" class="loading">查無資料</td></tr>';
+            <div class="detail-item">
+                <small>車主</small>
+                <b>${owner?.dc || vehicle.owner}</b>
+            </div>
 
-                return;
+            <div class="detail-item">
+                <small>車型</small>
+                <b>${vehicle.model}</b>
+            </div>
 
-            }
+            <div class="detail-item">
+                <small>顏色</small>
+                <b>${vehicle.color}</b>
+            </div>
 
+            <div class="detail-item">
+                <small>保險</small>
+                <b>${vehicle.insurance}</b>
+            </div>
 
-            resultBox.innerHTML = "";
+            <div class="detail-item">
+                <small>車籍狀態</small>
+                <b>
+                    ${
+                        vehicle.illegal
+                        ?"⚠️ 協尋中"
+                        :"正常"
+                    }
+                </b>
+            </div>
 
+        </div>
 
-            data.forEach(function(person) {
+        <br>
 
-                const row =
-                    document.createElement("tr");
+        <div style="
+            padding:12px;
+            background:#111827;
+            border:1px solid var(--border);
+            border-radius:6px
+        ">
 
+            <b>違規／協尋原因</b>
 
-                row.innerHTML = `
+            <p style="
+                color:var(--muted);
+                margin-top:5px
+            ">
+                ${vehicle.violations}
+            </p>
 
-                    <td>${escapeHtml(person.name || "")}</td>
+        </div>
+        `,
 
-                    <td>${escapeHtml(person.id || "")}</td>
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            關閉
+        </button>
+        `
+    );
+}
 
-                    <td>${escapeHtml(person.birth || "")}</td>
+/* =========================================================
+   WANTED
+========================================================= */
 
-                    <td>${escapeHtml(person.phone || "")}</td>
+function searchWanted(){
+
+    const key =
+        document.getElementById("wanted-search")
+        ?.value
+        .trim()
+        .toLowerCase() || "";
+
+    const wantedPeople =
+        people.filter(person =>
+            person.wanted &&
+            (
+                !key ||
+                person.dc.toLowerCase().includes(key) ||
+                person.roblox.toLowerCase().includes(key) ||
+                person.id.includes(key)
+            )
+        );
+
+    const wantedVehicles =
+        vehicles.filter(vehicle =>
+            vehicle.illegal &&
+            (
+                !key ||
+                vehicle.plate.toLowerCase().includes(key) ||
+                vehicle.owner.toLowerCase().includes(key)
+            )
+        );
+
+    let wantedHTML = `
+        <h3 style="
+            font-size:13px;
+            color:var(--red);
+            margin-bottom:10px
+        ">
+            🚨 通緝人員 (${wantedPeople.length})
+        </h3>
+    `;
+
+    wantedPeople.forEach(person=>{
+
+        wantedHTML += `
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    👤 <b>${person.dc}</b>
+                    ｜${person.roblox}
+                </div>
+
+                <span class="badge red">
+                    ⚠️ 通緝中
+                </span>
+
+            </div>
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+                    <small>身分證</small>
+                    <b>${person.id}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>年齡</small>
+                    <b>${person.age}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>紀錄</small>
+                    <b>${person.record}</b>
+                </div>
+
+            </div>
+
+            <br>
+
+            <div style="color:#f87171">
+                <b>通緝原因：</b>
+                ${person.wantedReason}
+            </div>
+
+            <br>
+
+            <button
+                class="btn primary"
+                onclick="showPerson('${person.id}')"
+            >
+                查看人員
+            </button>
+
+            <button
+                class="btn red"
+                onclick="cancelWanted('${person.id}')"
+            >
+                解除通緝
+            </button>
+
+        </div>
+        `;
+    });
+
+    wantedHTML += `
+        <h3 style="
+            font-size:13px;
+            color:var(--yellow);
+            margin:20px 0 10px
+        ">
+            🚗 協尋車輛 (${wantedVehicles.length})
+        </h3>
+    `;
+
+    wantedVehicles.forEach(vehicle=>{
+
+        wantedHTML += `
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    🚗 <b>${vehicle.plate}</b>
+                    ｜${vehicle.model}
+                </div>
+
+                <span class="badge yellow">
+                    ⚠️ 協尋
+                </span>
+
+            </div>
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+                    <small>車主</small>
+                    <b>${vehicle.owner}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>車色</small>
+                    <b>${vehicle.color}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>原因</small>
+                    <b>${vehicle.violations}</b>
+                </div>
+
+            </div>
+
+            <br>
+
+            <button
+                class="btn primary"
+                onclick="showVehicle('${vehicle.plate}')"
+            >
+                查看車輛
+            </button>
+
+            <button
+                class="btn yellow"
+                onclick="cancelVehicleWanted('${vehicle.plate}')"
+            >
+                解除協尋
+            </button>
+
+        </div>
+        `;
+    });
+
+    if(
+        !wantedPeople.length &&
+        !wantedVehicles.length
+    ){
+        wantedHTML += `
+            <div class="empty">
+                目前沒有符合條件的通緝／協尋資料。
+            </div>
+        `;
+    }
+
+    const target =
+        document.getElementById("wanted-results");
+
+    if(target){
+        target.innerHTML = wantedHTML;
+    }
+}
+
+function cancelWanted(id){
+
+    const person =
+        people.find(item=>item.id===id);
+
+    if(!person){
+        return;
+    }
+
+    if(!confirm(
+        `確定解除 ${person.dc} 的通緝嗎？`
+    )){
+        return;
+    }
+
+    person.wanted = false;
+    person.wantedReason = "";
+
+    addLog(`解除通緝：${person.dc}`);
+
+    saveData();
+    renderAll();
+}
+
+function cancelVehicleWanted(plate){
+
+    const vehicle =
+        vehicles.find(item=>item.plate===plate);
+
+    if(!vehicle){
+        return;
+    }
+
+    if(!confirm(
+        `確定解除 ${plate} 的協尋嗎？`
+    )){
+        return;
+    }
+
+    vehicle.illegal = false;
+
+    addLog(`解除車輛協尋：${plate}`);
+
+    saveData();
+    renderAll();
+}
+
+/* =========================================================
+   CASES
+========================================================= */
+
+function renderCases(){
+
+    const searchInput =
+        document.getElementById("case-search");
+
+    const filterInput =
+        document.getElementById("case-filter");
+
+    const key =
+        searchInput?.value
+        ?.trim()
+        .toLowerCase() || "";
+
+    const filter =
+        filterInput?.value || "";
+
+    const data = cases.filter(item =>
+
+        (
+            item.id.toLowerCase().includes(key) ||
+            item.name.toLowerCase().includes(key) ||
+            item.location.toLowerCase().includes(key) ||
+            item.type.toLowerCase().includes(key)
+        )
+
+        &&
+
+        (!filter || item.status===filter)
+    );
+
+    const target =
+        document.getElementById("case-results");
+
+    if(!target){
+        return;
+    }
+
+    if(!data.length){
+
+        target.innerHTML =
+            `<div class="empty">沒有符合條件的案件。</div>`;
+
+        return;
+    }
+
+    target.innerHTML = `
+    <table>
+
+        <thead>
+            <tr>
+                <th>案件編號</th>
+                <th>案件</th>
+                <th>類型</th>
+                <th>地點</th>
+                <th>狀態</th>
+                <th>優先度</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            ${data.map(item=>`
+
+                <tr>
+
+                    <td
+                        class="clickable"
+                        onclick="showCase('${item.id}')"
+                    >
+                        ${item.id}
+                    </td>
+
+                    <td>${item.name}</td>
+                    <td>${item.type}</td>
+                    <td>${item.location}</td>
 
                     <td>
+                        <span class="badge ${
+                            item.status==="待處理"
+                            ?"yellow":
+                            item.status==="處理中"
+                            ?"blue":"green"
+                        }">
+                            ${item.status}
+                        </span>
+                    </td>
 
+                    <td>
+                        <span class="badge ${
+                            item.priority==="高"
+                            ?"red":
+                            item.priority==="中"
+                            ?"yellow":"green"
+                        }">
+                            ${item.priority}
+                        </span>
+                    </td>
+
+                    <td>
                         <button
-                            class="btn btn-primary"
-                            onclick='showPersonDetail(${JSON.stringify(person).replace(/'/g, "&apos;")})'
+                            class="btn"
+                            onclick="showCase('${item.id}')"
                         >
-                            詳細
+                            查看
                         </button>
-
                     </td>
 
-                `;
+                </tr>
 
+            `).join("")}
 
-                resultBox.appendChild(row);
+        </tbody>
 
-            });
+    </table>
+    `;
+}
 
+function openCaseModal(editId=null){
+
+    const caseData =
+        editId
+        ? cases.find(item=>item.id===editId)
+        : null;
+
+    openModal(
+
+        editId
+        ?"✏️ 編輯案件"
+        :"➕ 建立案件",
+
+        `
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>案件名稱</label>
+
+                <input
+                    class="input"
+                    id="case-name"
+                    value="${caseData?.name || ""}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>案件類型</label>
+
+                <select id="case-type">
+
+                    ${[
+                        "刑案",
+                        "交通事故",
+                        "民眾求助",
+                        "其他"
+                    ].map(type=>`
+                        <option
+                            ${caseData?.type===type
+                            ?"selected":""}
+                        >
+                            ${type}
+                        </option>
+                    `).join("")}
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>發生地點</label>
+
+                <input
+                    class="input"
+                    id="case-location"
+                    value="${caseData?.location || ""}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>涉案人</label>
+
+                <input
+                    class="input"
+                    id="case-person"
+                    value="${caseData?.person || ""}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>優先度</label>
+
+                <select id="case-priority">
+
+                    ${["高","中","低"].map(priority=>`
+                        <option
+                            ${caseData?.priority===priority
+                            ?"selected":""}
+                        >
+                            ${priority}
+                        </option>
+                    `).join("")}
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>狀態</label>
+
+                <select id="case-status">
+
+                    ${[
+                        "待處理",
+                        "處理中",
+                        "已結案"
+                    ].map(status=>`
+                        <option
+                            ${caseData?.status===status
+                            ?"selected":""}
+                        >
+                            ${status}
+                        </option>
+                    `).join("")}
+
+                </select>
+
+            </div>
+
+            <div class="form-group form-full">
+
+                <label>案件描述</label>
+
+                <textarea id="case-description">${caseData?.description || ""}</textarea>
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn primary"
+            onclick="saveCase('${editId || ""}')"
+        >
+            ${editId?"儲存修改":"建立案件"}
+        </button>
+        `
+    );
+}
+
+function saveCase(id){
+
+    const name =
+        document.getElementById("case-name")
+        .value
+        .trim();
+
+    if(!name){
+
+        alert("請輸入案件名稱");
+        return;
+    }
+
+    const data = {
+        name,
+        type:document.getElementById("case-type").value,
+        location:document.getElementById("case-location").value.trim(),
+        person:document.getElementById("case-person").value.trim(),
+        priority:document.getElementById("case-priority").value,
+        status:document.getElementById("case-status").value,
+        description:document.getElementById("case-description").value.trim()
+    };
+
+    if(id){
+
+        const caseData =
+            cases.find(item=>item.id===id);
+
+        if(caseData){
+
+            Object.assign(caseData,data);
+
+            addLog(`修改案件 ${id}`);
         }
 
+    }else{
 
-        /* =========================
-           車輛搜尋
-        ========================== */
+        const newId =
+            "#"+String(Date.now()).slice(-5);
 
-        async function searchVehicles() {
+        cases.unshift({
+            id:newId,
+            ...data,
+            time:new Date().toLocaleTimeString(
+                "zh-TW",
+                {
+                    hour:"2-digit",
+                    minute:"2-digit"
+                }
+            )
+        });
 
-            const query =
-                document
-                    .getElementById("vehicleQuery")
-                    .value
-                    .trim();
+        addLog(`建立案件 ${newId}`);
+    }
 
+    saveData();
+    closeModal();
+    renderAll();
+}
 
-            const resultBox =
-                document
-                    .getElementById("vehicleResults");
+function showCase(id){
 
+    const caseData =
+        cases.find(item=>item.id===id);
 
-            resultBox.innerHTML =
-                '<tr><td colspan="5" class="loading">搜尋中...</td></tr>';
+    if(!caseData){
+        return;
+    }
 
+    openModal(
 
-            const result =
-                await apiRequest({
+        `📋 案件 ${caseData.id}`,
 
-                    action:
-                        "searchVehicle",
+        `
+        <div class="detail-grid">
 
-                    query:
-                        query
+            <div class="detail-item">
+                <small>案件編號</small>
+                <b>${caseData.id}</b>
+            </div>
 
-                });
+            <div class="detail-item">
+                <small>案件名稱</small>
+                <b>${caseData.name}</b>
+            </div>
 
+            <div class="detail-item">
+                <small>類型</small>
+                <b>${caseData.type}</b>
+            </div>
 
-            if (
-                !result ||
-                !result.success
-            ) {
+            <div class="detail-item">
+                <small>地點</small>
+                <b>${caseData.location}</b>
+            </div>
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="5" class="loading">查詢失敗</td></tr>';
+            <div class="detail-item">
+                <small>涉案人</small>
+                <b>${caseData.person || "未知"}</b>
+            </div>
 
-                return;
+            <div class="detail-item">
+                <small>狀態</small>
+                <b>${caseData.status}</b>
+            </div>
 
-            }
+        </div>
 
+        <br>
 
-            const data =
-                result.data || [];
+        <div class="panel-title">
+            📝 案件描述
+        </div>
 
+        <div style="
+            margin-top:10px;
+            padding:13px;
+            background:#111827;
+            border-radius:6px;
+            color:var(--muted);
+            line-height:1.7
+        ">
+            ${caseData.description || "無案件描述"}
+        </div>
+        `,
 
-            if (
-                data.length === 0
-            ) {
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            關閉
+        </button>
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="5" class="loading">查無資料</td></tr>';
+        <button
+            class="btn primary"
+            onclick="
+                closeModal();
+                openCaseModal('${caseData.id}')
+            "
+        >
+            ✏️ 編輯
+        </button>
 
-                return;
-
-            }
-
-
-            resultBox.innerHTML = "";
-
-
-            data.forEach(function(vehicle) {
-
-                const row =
-                    document.createElement("tr");
-
-
-                row.innerHTML = `
-
-                    <td>${escapeHtml(vehicle.plate || "")}</td>
-
-                    <td>${escapeHtml(vehicle.owner || "")}</td>
-
-                    <td>${escapeHtml(vehicle.model || "")}</td>
-
-                    <td>${escapeHtml(vehicle.color || "")}</td>
-
-                    <td>
-
-                        <button
-                            class="btn btn-primary"
-                            onclick='showVehicleDetail(${JSON.stringify(vehicle).replace(/'/g, "&apos;")})'
-                        >
-                            詳細
-                        </button>
-
-                    </td>
-
-                `;
-
-
-                resultBox.appendChild(row);
-
-            });
-
+        ${
+            caseData.status!=="已結案"
+            ?
+            `
+            <button
+                class="btn green"
+                onclick="
+                    closeModal();
+                    closeCase('${caseData.id}')
+                "
+            >
+                ✅ 結案
+            </button>
+            `
+            :""
         }
+        `
+    );
+}
 
+function closeCase(id){
 
-        /* =========================
-           通緝搜尋
-        ========================== */
+    const caseData =
+        cases.find(item=>item.id===id);
 
-        async function searchWarrants() {
+    if(!caseData){
+        return;
+    }
 
-            const query =
-                document
-                    .getElementById("warrantQuery")
-                    .value
-                    .trim();
+    if(!confirm(
+        `確定將 ${id} 結案嗎？`
+    )){
+        return;
+    }
 
+    caseData.status = "已結案";
 
-            const resultBox =
-                document
-                    .getElementById("warrantResults");
+    addLog(`案件 ${id} 已結案`);
 
+    saveData();
+    renderAll();
+}
 
-            resultBox.innerHTML =
-                '<tr><td colspan="6" class="loading">搜尋中...</td></tr>';
+/* =========================================================
+   SUPPORT
+========================================================= */
 
+function renderSupports(){
 
-            const result =
-                await apiRequest({
+    const target =
+        document.getElementById("support-results");
 
-                    action:
-                        "searchWarrant",
+    if(!target){
+        return;
+    }
 
-                    query:
-                        query
+    if(!supports.length){
 
-                });
+        target.innerHTML =
+            `<div class="empty">目前沒有支援請求。</div>`;
 
+        return;
+    }
 
-            if (
-                !result ||
-                !result.success
-            ) {
+    target.innerHTML =
+        supports.map(item=>`
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="6" class="loading">查詢失敗</td></tr>';
+        <div class="panel">
 
-                return;
+            <div class="panel-header">
 
+                <div>
+                    🚨 <b>${item.id}</b>
+                    ｜${item.location}
+                </div>
+
+                <span class="badge ${
+                    item.priority==="緊急"
+                    ?"red":
+                    item.priority==="高"
+                    ?"orange":"yellow"
+                }">
+                    ${item.priority}
+                </span>
+
+            </div>
+
+            <div class="detail-grid">
+
+                <div class="detail-item">
+                    <small>需求單位</small>
+                    <b>${item.unit}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>發布人</small>
+                    <b>${item.officer}</b>
+                </div>
+
+                <div class="detail-item">
+                    <small>狀態</small>
+                    <b>${item.status}</b>
+                </div>
+
+            </div>
+
+            <br>
+
+            <p style="
+                color:var(--muted);
+                font-size:12px
+            ">
+                ${item.reason}
+            </p>
+
+            <br>
+
+            ${
+                item.status==="等待支援"
+                ?
+                `
+                <button
+                    class="btn green"
+                    onclick="acceptSupport('${item.id}')"
+                >
+                    🚓 接受支援
+                </button>
+                `
+                :""
             }
 
+            <button
+                class="btn"
+                onclick="removeSupport('${item.id}')"
+            >
+                結束請求
+            </button>
 
-            const data =
-                result.data || [];
+        </div>
 
+    `).join("");
+}
 
-            if (
-                data.length === 0
-            ) {
+function openSupportModal(){
 
-                resultBox.innerHTML =
-                    '<tr><td colspan="6" class="loading">查無資料</td></tr>';
+    openModal(
 
-                return;
+        "🚨 發布支援請求",
 
-            }
+        `
+        <div class="form-grid">
 
+            <div class="form-group">
 
-            resultBox.innerHTML = "";
+                <label>發生地點</label>
 
+                <input
+                    class="input"
+                    id="support-location"
+                >
 
-            data.forEach(function(warrant) {
+            </div>
 
-                const row =
-                    document.createElement("tr");
+            <div class="form-group">
 
+                <label>需求單位</label>
 
-                const statusClass =
-                    warrant.status === "有效"
-                        ? "status-active"
-                        : "status-normal";
+                <select id="support-unit">
 
+                    <option>巡邏組</option>
+                    <option>交通組</option>
+                    <option>偵查組</option>
+                    <option>SWAT</option>
+                    <option>全部單位</option>
 
-                row.innerHTML = `
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>優先程度</label>
+
+                <select id="support-priority">
+
+                    <option>普通</option>
+                    <option>高</option>
+                    <option>緊急</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group form-full">
+
+                <label>支援原因</label>
+
+                <textarea id="support-reason"></textarea>
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn red"
+            onclick="createSupport()"
+        >
+            發布請求
+        </button>
+        `
+    );
+}
+
+function createSupport(){
+
+    const id =
+        "S-"+String(Date.now()).slice(-4);
+
+    supports.unshift({
+
+        id,
+
+        location:
+            document.getElementById("support-location")
+            .value.trim(),
+
+        unit:
+            document.getElementById("support-unit")
+            .value,
+
+        priority:
+            document.getElementById("support-priority")
+            .value,
+
+        reason:
+            document.getElementById("support-reason")
+            .value.trim(),
+
+        officer:currentUser.name,
+
+        status:"等待支援"
+    });
+
+    notifications.unshift({
+
+        title:"🚨 新支援請求",
+
+        text:
+            `${currentUser.name} 發布支援請求。`,
+
+        time:"剛剛"
+    });
+
+    addLog(`發布支援請求 ${id}`);
+
+    saveData();
+    closeModal();
+    renderAll();
+}
+
+function acceptSupport(id){
+
+    const support =
+        supports.find(item=>item.id===id);
+
+    if(!support){
+        return;
+    }
+
+    support.status =
+        `${currentUser.name} 已接受`;
+
+    addLog(`接受支援請求 ${id}`);
+
+    saveData();
+    renderSupports();
+}
+
+function removeSupport(id){
+
+    supports =
+        supports.filter(item=>item.id!==id);
+
+    addLog(`結束支援請求 ${id}`);
+
+    saveData();
+    renderSupports();
+}
+
+/* =========================================================
+   REPORTS
+========================================================= */
+
+function renderReports(){
+
+    const target =
+        document.getElementById("report-results");
+
+    if(!target){
+        return;
+    }
+
+    if(!reports.length){
+
+        target.innerHTML =
+            `<div class="empty">尚無案件報告。</div>`;
+
+        return;
+    }
+
+    target.innerHTML = `
+    <table>
+
+        <thead>
+            <tr>
+                <th>報告編號</th>
+                <th>類型</th>
+                <th>案件</th>
+                <th>撰寫人</th>
+                <th>時間</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            ${reports.map(report=>`
+
+                <tr
+                    onclick="showReport('${report.id}')"
+                    style="cursor:pointer"
+                >
+
+                    <td>${report.id}</td>
+                    <td>${report.type}</td>
+                    <td>${report.caseId}</td>
+                    <td>${report.officer}</td>
+                    <td>${report.time}</td>
+
+                </tr>
+
+            `).join("")}
+
+        </tbody>
+
+    </table>
+    `;
+}
+
+function openReportModal(){
+
+    openModal(
+
+        "📄 新增案件報告",
+
+        `
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>案件編號</label>
+
+                <input
+                    class="input"
+                    id="report-case"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>報告類型</label>
+
+                <select id="report-type">
+
+                    <option>勤務報告</option>
+                    <option>逮捕報告</option>
+                    <option>交通事故報告</option>
+                    <option>使用武力報告</option>
+                    <option>其他</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group form-full">
+
+                <label>事件經過</label>
+
+                <textarea id="report-content"></textarea>
+
+            </div>
+
+            <div class="form-group form-full">
+
+                <label>處理結果</label>
+
+                <textarea id="report-result"></textarea>
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn primary"
+            onclick="createReport()"
+        >
+            提交報告
+        </button>
+        `
+    );
+}
+
+function createReport(){
+
+    const report = {
+
+        id:
+            "R-"+String(Date.now()).slice(-5),
+
+        caseId:
+            document.getElementById("report-case")
+            .value.trim(),
+
+        type:
+            document.getElementById("report-type")
+            .value,
+
+        content:
+            document.getElementById("report-content")
+            .value.trim(),
+
+        result:
+            document.getElementById("report-result")
+            .value.trim(),
+
+        officer:
+            currentUser.name,
+
+        time:
+            new Date().toLocaleString("zh-TW")
+    };
+
+    reports.unshift(report);
+
+    addLog(`建立案件報告 ${report.id}`);
+
+    saveData();
+    closeModal();
+    renderReports();
+}
+
+function showReport(id){
+
+    const report =
+        reports.find(item=>item.id===id);
+
+    if(!report){
+        return;
+    }
+
+    openModal(
+
+        `📄 報告 ${report.id}`,
+
+        `
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <small>案件</small>
+                <b>${report.caseId}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>類型</small>
+                <b>${report.type}</b>
+            </div>
+
+            <div class="detail-item">
+                <small>撰寫人</small>
+                <b>${report.officer}</b>
+            </div>
+
+        </div>
+
+        <br>
+
+        <b>事件經過</b>
+
+        <p style="
+            color:var(--muted);
+            margin:8px 0 18px;
+            line-height:1.7
+        ">
+            ${report.content || "無"}
+        </p>
+
+        <b>處理結果</b>
+
+        <p style="
+            color:var(--muted);
+            margin-top:8px;
+            line-height:1.7
+        ">
+            ${report.result || "無"}
+        </p>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            關閉
+        </button>
+        `
+    );
+}
+
+/* =========================================================
+   VIOLATIONS
+========================================================= */
+
+function renderViolations(){
+
+    const target =
+        document.getElementById("violation-results");
+
+    if(!target){
+        return;
+    }
+
+    if(!violations.length){
+
+        target.innerHTML =
+            `<div class="empty">目前沒有交通違規。</div>`;
+
+        return;
+    }
+
+    target.innerHTML = `
+    <table>
+
+        <thead>
+            <tr>
+                <th>編號</th>
+                <th>違規人</th>
+                <th>車牌</th>
+                <th>違規</th>
+                <th>地點</th>
+                <th>警員</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            ${violations.map(item=>`
+
+                <tr>
+
+                    <td>${item.id}</td>
+                    <td>${item.person}</td>
+                    <td>${item.plate}</td>
 
                     <td>
-                        ${escapeHtml(warrant.caseId || "")}
+                        <span class="badge yellow">
+                            ${item.type}
+                        </span>
                     </td>
 
-                    <td>
-                        ${escapeHtml(warrant.name || "")}
-                    </td>
+                    <td>${item.location}</td>
+                    <td>${item.officer}</td>
+
+                </tr>
+
+            `).join("")}
+
+        </tbody>
+
+    </table>
+    `;
+}
+
+function openViolationModal(){
+
+    openModal(
+
+        "🚧 建立交通違規",
+
+        `
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>違規人</label>
+
+                <input
+                    class="input"
+                    id="violation-person"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>車牌</label>
+
+                <input
+                    class="input"
+                    id="violation-plate"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>違規項目</label>
+
+                <select id="violation-type">
+
+                    <option>超速</option>
+                    <option>闖紅燈</option>
+                    <option>違規停車</option>
+                    <option>危險駕駛</option>
+                    <option>無照駕駛</option>
+                    <option>其他</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>發生地點</label>
+
+                <input
+                    class="input"
+                    id="violation-location"
+                >
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn primary"
+            onclick="createViolation()"
+        >
+            建立
+        </button>
+        `
+    );
+}
+
+function createViolation(){
+
+    const violation = {
+
+        id:
+            "V-"+String(Date.now()).slice(-5),
+
+        person:
+            document.getElementById("violation-person")
+            .value.trim(),
+
+        plate:
+            document.getElementById("violation-plate")
+            .value.trim(),
+
+        type:
+            document.getElementById("violation-type")
+            .value,
+
+        location:
+            document.getElementById("violation-location")
+            .value.trim(),
+
+        officer:
+            currentUser.name,
+
+        time:"今日"
+    };
+
+    violations.unshift(violation);
+
+    addLog(
+        `建立交通違規 ${violation.id}`
+    );
+
+    saveData();
+    closeModal();
+    renderAll();
+}
+
+/* =========================================================
+   TICKETS
+========================================================= */
+
+function renderTickets(){
+
+    const target =
+        document.getElementById("ticket-results");
+
+    if(!target){
+        return;
+    }
+
+    if(!tickets.length){
+
+        target.innerHTML =
+            `<div class="empty">目前沒有罰單。</div>`;
+
+        return;
+    }
+
+    target.innerHTML = `
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>罰單</th>
+                <th>違規人</th>
+                <th>車牌</th>
+                <th>違規</th>
+                <th>金額</th>
+                <th>狀態</th>
+                <th>操作</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            ${tickets.map(ticket=>`
+
+                <tr>
+
+                    <td>${ticket.id}</td>
+                    <td>${ticket.person}</td>
+                    <td>${ticket.plate}</td>
+                    <td>${ticket.reason}</td>
+                    <td>$${ticket.amount}</td>
 
                     <td>
-                        ${escapeHtml(warrant.type || "")}
-                    </td>
 
-                    <td>
-                        ${escapeHtml(warrant.reason || "")}
-                    </td>
-
-                    <td>
-
-                        <span class="status ${statusClass}">
-                            ${escapeHtml(warrant.status || "")}
+                        <span class="badge ${
+                            ticket.status==="未繳"
+                            ?"red":"green"
+                        }">
+                            ${ticket.status}
                         </span>
 
                     </td>
 
                     <td>
 
-                        <button
-                            class="btn btn-primary"
-                            onclick='showWarrantDetail(${JSON.stringify(warrant).replace(/'/g, "&apos;")})'
-                        >
-                            詳細
-                        </button>
-
                         ${
-                            warrant.status === "有效"
-
+                            ticket.status==="未繳"
                             ?
-
                             `
                             <button
-                                class="btn btn-success"
-                                onclick="removeWarrant('${escapeAttribute(warrant.caseId || "")}')"
+                                class="btn green"
+                                onclick="payTicket('${ticket.id}')"
                             >
-                                解除
+                                標記已繳
                             </button>
                             `
-
                             :
-
-                            ""
-
+                            "已完成"
                         }
 
                     </td>
 
-                `;
+                </tr>
 
+            `).join("")}
 
-                resultBox.appendChild(row);
+        </tbody>
 
-            });
+    </table>
+    `;
+}
 
+function openTicketModal(){
+
+    openModal(
+
+        "💳 開立交通罰單",
+
+        `
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>違規人</label>
+
+                <input
+                    class="input"
+                    id="ticket-person"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>車牌</label>
+
+                <input
+                    class="input"
+                    id="ticket-plate"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>違規原因</label>
+
+                <input
+                    class="input"
+                    id="ticket-reason"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>罰款金額</label>
+
+                <input
+                    class="input"
+                    type="number"
+                    id="ticket-amount"
+                    min="0"
+                >
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn primary"
+            onclick="createTicket()"
+        >
+            開立罰單
+        </button>
+        `
+    );
+}
+
+function createTicket(){
+
+    const ticket = {
+
+        id:
+            "T-"+String(Date.now()).slice(-5),
+
+        person:
+            document.getElementById("ticket-person")
+            .value.trim(),
+
+        plate:
+            document.getElementById("ticket-plate")
+            .value.trim(),
+
+        reason:
+            document.getElementById("ticket-reason")
+            .value.trim(),
+
+        amount:
+            Number(
+                document.getElementById("ticket-amount")
+                .value
+            ) || 0,
+
+        status:"未繳",
+
+        officer:
+            currentUser.name
+    };
+
+    tickets.unshift(ticket);
+
+    addLog(
+        `開立罰單 ${ticket.id}`
+    );
+
+    saveData();
+    closeModal();
+    renderAll();
+}
+
+function payTicket(id){
+
+    const ticket =
+        tickets.find(item=>item.id===id);
+
+    if(!ticket){
+        return;
+    }
+
+    if(!confirm(
+        `確定將 ${id} 標記為已繳嗎？`
+    )){
+        return;
+    }
+
+    ticket.status = "已繳";
+
+    addLog(`罰單 ${id} 已繳`);
+
+    saveData();
+    renderAll();
+}
+
+/* =========================================================
+   WANTED MODAL
+========================================================= */
+
+function openWantedModal(){
+
+    openModal(
+
+        "🚨 新增通緝",
+
+        `
+        <div class="form-grid">
+
+            <div class="form-group form-full">
+
+                <label>選擇人員 ID</label>
+
+                <input
+                    class="input"
+                    id="wanted-person"
+                    placeholder="例如：4775123066"
+                >
+
+            </div>
+
+            <div class="form-group form-full">
+
+                <label>通緝原因</label>
+
+                <textarea
+                    id="wanted-reason"
+                ></textarea>
+
+            </div>
+
+        </div>
+        `,
+
+        `
+        <button
+            class="btn"
+            onclick="closeModal()"
+        >
+            取消
+        </button>
+
+        <button
+            class="btn red"
+            onclick="createWanted()"
+        >
+            發布通緝
+        </button>
+        `
+    );
+}
+
+function createWanted(){
+
+    const id =
+        document.getElementById("wanted-person")
+        .value
+        .trim();
+
+    const person =
+        people.find(item=>item.id===id);
+
+    if(!person){
+
+        alert("找不到此人員");
+        return;
+    }
+
+    person.wanted = true;
+
+    person.wantedReason =
+        document.getElementById("wanted-reason")
+        .value
+        .trim() ||
+        "未提供原因";
+
+    addLog(
+        `發布通緝：${person.dc}`
+    );
+
+    notifications.unshift({
+
+        title:"🚨 新增通緝",
+
+        text:
+            `${person.dc} 已被列入通緝名單。`,
+
+        time:"剛剛"
+    });
+
+    saveData();
+    closeModal();
+    renderAll();
+}
+
+/* =========================================================
+   DUTY
+========================================================= */
+
+function setDuty(status){
+
+    if(!currentUser){
+        return;
+    }
+
+    const title =
+        document.getElementById("duty-status");
+
+    const info =
+        document.getElementById("duty-info");
+
+    if(status==="10-7"){
+
+        title.innerText =
+            "10-7 結束勤務";
+
+        title.style.color =
+            "var(--red)";
+
+        info.innerText =
+            `單位：${currentUser.dept}｜目前未執勤`;
+
+        if(dutyInterval){
+            clearInterval(dutyInterval);
+            dutyInterval=null;
         }
 
+        document.getElementById("duty-time")
+            .innerText="00:00";
 
-        /* =========================
-           新增人員
-        ========================== */
+        addLog("結束勤務");
 
-        async function addPerson(event) {
+        return;
+    }
 
-            event.preventDefault();
+    if(!dutyStart){
+        dutyStart = new Date();
+    }
 
+    const statusText = {
 
-            const data = {
+        "10-8":"10-8 在線執勤",
+        "10-6":"10-6 暫時離開",
+        "10-23":"10-23 現場到達"
 
-                action:
-                    "addPerson",
+    };
 
-                name:
-                    document
-                        .getElementById("personName")
-                        .value,
+    title.innerText =
+        statusText[status] || status;
 
-                id:
-                    document
-                        .getElementById("personId")
-                        .value,
+    title.style.color =
+        status==="10-6"
+        ?"var(--blue)"
+        :
+        status==="10-23"
+        ?"var(--yellow)"
+        :
+        "var(--green)";
 
-                birth:
-                    document
-                        .getElementById("personBirth")
-                        .value,
+    info.innerText =
+        `單位：${currentUser.dept}`;
 
-                gender:
-                    document
-                        .getElementById("personGender")
-                        .value,
+    if(dutyInterval){
+        clearInterval(dutyInterval);
+    }
 
-                phone:
-                    document
-                        .getElementById("personPhone")
-                        .value,
+    dutyInterval =
+        setInterval(updateDutyTime,1000);
 
-                officer:
-                    currentOfficerName
+    updateDutyTime();
+}
 
-            };
+function updateDutyTime(){
 
+    if(!dutyStart){
+        return;
+    }
 
-            const result =
-                await apiRequest(data);
+    const seconds =
+        Math.floor(
+            (new Date()-dutyStart)/1000
+        );
 
+    const hours =
+        String(
+            Math.floor(seconds/3600)
+        ).padStart(2,"0");
 
-            if (
-                result &&
-                result.success
-            ) {
+    const minutes =
+        String(
+            Math.floor((seconds%3600)/60)
+        ).padStart(2,"0");
 
-                showToast(
-                    "人員資料新增成功"
-                );
+    document.getElementById("duty-time")
+        .innerText =
+        `${hours}:${minutes}`;
+}
 
-                document
-                    .getElementById("personForm")
-                    .reset();
+/* =========================================================
+   LOG
+========================================================= */
 
-                loadDashboard();
+function addLog(action){
 
-            }
+    logs.unshift({
 
-            else {
+        time:
+            new Date().toLocaleString("zh-TW"),
 
-                showToast(
-                    "新增失敗"
-                );
+        officer:
+            currentUser
+            ?currentUser.name
+            :"System",
 
-            }
+        action
+    });
 
+    if(logs.length>200){
+        logs = logs.slice(0,200);
+    }
+
+    localStorage.setItem(
+        "mdt_logs",
+        JSON.stringify(logs)
+    );
+}
+
+function renderLogs(){
+
+    const target =
+        document.getElementById("log-results");
+
+    if(!target){
+        return;
+    }
+
+    if(!logs.length){
+
+        target.innerHTML =
+            `<div class="empty">尚無操作紀錄。</div>`;
+
+        return;
+    }
+
+    target.innerHTML = `
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>時間</th>
+                <th>操作人</th>
+                <th>操作內容</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            ${logs.slice(0,100).map(log=>`
+
+                <tr>
+
+                    <td>${log.time}</td>
+                    <td>${log.officer}</td>
+                    <td>${log.action}</td>
+
+                </tr>
+
+            `).join("")}
+
+        </tbody>
+
+    </table>
+    `;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(title,body,footer){
+
+    document.getElementById("modal-title")
+        .innerText=title;
+
+    document.getElementById("modal-body")
+        .innerHTML=body;
+
+    document.getElementById("modal-foot")
+        .innerHTML=footer || "";
+
+    document.getElementById("modal")
+        .classList.add("show");
+}
+
+function closeModal(){
+
+    document.getElementById("modal")
+        .classList.remove("show");
+}
+
+document.getElementById("modal")
+    .addEventListener("click",function(event){
+
+        if(event.target===this){
+            closeModal();
         }
 
+    });
 
-        /* =========================
-           新增車輛
-        ========================== */
+/* =========================================================
+   NOTIFICATION
+========================================================= */
 
-        async function addVehicle(event) {
+function toggleNotifications(){
 
-            event.preventDefault();
+    document.getElementById("notification-panel")
+        .classList.toggle("show");
+}
 
+/* =========================================================
+   SETTINGS
+========================================================= */
 
-            const data = {
+function toggleCompact(){
 
-                action:
-                    "addVehicle",
+    document.body.classList.toggle("compact");
 
-                plate:
-                    document
-                        .getElementById("vehiclePlate")
-                        .value,
+    const enabled =
+        document.body.classList.contains("compact");
 
-                owner:
-                    document
-                        .getElementById("vehicleOwner")
-                        .value,
+    localStorage.setItem(
+        "mdt_compact",
+        enabled ? "1":"0"
+    );
+}
 
-                model:
-                    document
-                        .getElementById("vehicleModel")
-                        .value,
+function loadSettings(){
 
-                color:
-                    document
-                        .getElementById("vehicleColor")
-                        .value,
+    if(
+        localStorage.getItem("mdt_compact")==="1"
+    ){
+        document.body.classList.add("compact");
+    }
+}
 
-                officer:
-                    currentOfficerName
+function clearLocalData(){
 
-            };
+    if(!confirm(
+        "這會清除本機儲存的測試資料，確定嗎？"
+    )){
+        return;
+    }
 
+    const loginId =
+        localStorage.getItem("mdt_login");
 
-            const result =
-                await apiRequest(data);
+    localStorage.clear();
 
+    if(loginId){
+        localStorage.setItem(
+            "mdt_login",
+            loginId
+        );
+    }
 
-            if (
-                result &&
-                result.success
-            ) {
+    location.reload();
+}
 
-                showToast(
-                    "車輛資料新增成功"
-                );
+/* =========================================================
+   CLOCK
+========================================================= */
 
-                document
-                    .getElementById("vehicleForm")
-                    .reset();
+function updateClock(){
 
-                loadDashboard();
+    const now = new Date();
 
-            }
+    document.getElementById("clock")
+        .innerText =
+        "📅 "+now.toLocaleString("zh-TW");
+}
 
-            else {
+setInterval(updateClock,1000);
+updateClock();
 
-                showToast(
-                    "新增失敗"
-                );
+/* =========================================================
+   WEATHER
+========================================================= */
 
-            }
+async function updateWeather(){
 
-        }
+    try{
 
-
-        /* =========================
-           新增通緝
-        ========================== */
-
-        async function addWarrant(event) {
-
-            event.preventDefault();
-
-
-            const data = {
-
-                action:
-                    "addWarrant",
-
-                caseId:
-                    document
-                        .getElementById("warrantCaseId")
-                        .value,
-
-                name:
-                    document
-                        .getElementById("warrantName")
-                        .value,
-
-                personId:
-                    document
-                        .getElementById("warrantPersonId")
-                        .value,
-
-                type:
-                    document
-                        .getElementById("warrantType")
-                        .value,
-
-                reason:
-                    document
-                        .getElementById("warrantReason")
-                        .value,
-
-                officer:
-                    currentOfficerName
-
-            };
-
-
-            const result =
-                await apiRequest(data);
-
-
-            if (
-                result &&
-                result.success
-            ) {
-
-                showToast(
-                    "通緝／協尋案件新增成功"
-                );
-
-                document
-                    .getElementById("warrantForm")
-                    .reset();
-
-                loadDashboard();
-
-            }
-
-            else {
-
-                showToast(
-                    "新增失敗"
-                );
-
-            }
-
-        }
-
-
-        /* =========================
-           解除通緝
-        ========================== */
-
-        async function removeWarrant(caseId) {
-
-            const confirmed =
-                confirm(
-                    "確定要解除這筆通緝／協尋案件嗎？"
-                );
-
-
-            if (!confirmed) {
-
-                return;
-
-            }
-
-
-            const result =
-                await apiRequest({
-
-                    action:
-                        "removeWarrant",
-
-                    caseId:
-                        caseId,
-
-                    officer:
-                        currentOfficerName
-
-                });
-
-
-            if (
-                result &&
-                result.success
-            ) {
-
-                showToast(
-                    "案件已解除"
-                );
-
-                searchWarrants();
-
-                loadDashboard();
-
-            }
-
-            else {
-
-                showToast(
-                    "解除失敗"
-                );
-
-            }
-
-        }
-
-
-        /* =========================
-           詳細資料
-        ========================== */
-
-        function showPersonDetail(person) {
-
-            document
-                .getElementById("modalTitle")
-                .textContent =
-                    "人員詳細資料";
-
-
-            document
-                .getElementById("modalBody")
-                .innerHTML = `
-
-                    <div class="detail-row">
-                        <div class="detail-label">姓名</div>
-                        <div>${escapeHtml(person.name || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">身分證字號</div>
-                        <div>${escapeHtml(person.id || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">出生日期</div>
-                        <div>${escapeHtml(person.birth || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">性別</div>
-                        <div>${escapeHtml(person.gender || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">電話</div>
-                        <div>${escapeHtml(person.phone || "")}</div>
-                    </div>
-
-                `;
-
-
-            openModal();
-
-        }
-
-
-        function showVehicleDetail(vehicle) {
-
-            document
-                .getElementById("modalTitle")
-                .textContent =
-                    "車輛詳細資料";
-
-
-            document
-                .getElementById("modalBody")
-                .innerHTML = `
-
-                    <div class="detail-row">
-                        <div class="detail-label">車牌號碼</div>
-                        <div>${escapeHtml(vehicle.plate || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">車主</div>
-                        <div>${escapeHtml(vehicle.owner || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">車型</div>
-                        <div>${escapeHtml(vehicle.model || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">顏色</div>
-                        <div>${escapeHtml(vehicle.color || "")}</div>
-                    </div>
-
-                `;
-
-
-            openModal();
-
-        }
-
-
-        function showWarrantDetail(warrant) {
-
-            document
-                .getElementById("modalTitle")
-                .textContent =
-                    "案件詳細資料";
-
-
-            document
-                .getElementById("modalBody")
-                .innerHTML = `
-
-                    <div class="detail-row">
-                        <div class="detail-label">案件編號</div>
-                        <div>${escapeHtml(warrant.caseId || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">姓名</div>
-                        <div>${escapeHtml(warrant.name || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">身分證字號</div>
-                        <div>${escapeHtml(warrant.personId || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">案件類型</div>
-                        <div>${escapeHtml(warrant.type || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">原因</div>
-                        <div>${escapeHtml(warrant.reason || "")}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">目前狀態</div>
-                        <div>${escapeHtml(warrant.status || "")}</div>
-                    </div>
-
-                `;
-
-
-            openModal();
-
-        }
-
-
-        /* =========================
-           Modal
-        ========================== */
-
-        function openModal() {
-
-            document
-                .getElementById("detailModal")
-                .classList.add("active");
-
-        }
-
-
-        function closeModal() {
-
-            document
-                .getElementById("detailModal")
-                .classList.remove("active");
-
-        }
-
-
-        /* =========================
-           Toast
-        ========================== */
-
-        function showToast(message) {
-
-            const toast =
-                document.getElementById("toast");
-
-
-            toast.textContent = message;
-
-            toast.classList.add("show");
-
-
-            setTimeout(function() {
-
-                toast.classList.remove("show");
-
-            }, 3000);
-
-        }
-
-
-        /* =========================
-           防止 XSS
-        ========================== */
-
-        function escapeHtml(value) {
-
-            const div =
-                document.createElement("div");
-
-
-            div.textContent = value;
-
-            return div.innerHTML;
-
-        }
-
-
-        function escapeAttribute(value) {
-
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
-
-        }
-
-
-        /* =========================
-           Enter 登入
-        ========================== */
-
-        document
-            .getElementById("officerName")
-            .addEventListener(
-                "keydown",
-                function(event) {
-
-                    if (
-                        event.key === "Enter"
-                    ) {
-
-                        login();
-
-                    }
-
-                }
+        const response =
+            await fetch(
+                "https://api.open-meteo.com/v1/forecast?latitude=24.83&longitude=121.01&current=temperature_2m,weather_code"
             );
 
+        if(!response.ok){
+            throw new Error("Weather API Error");
+        }
 
-        /* =========================
-           Enter 搜尋
-        ========================== */
+        const data =
+            await response.json();
 
-        document
-            .getElementById("personQuery")
-            .addEventListener(
-                "keydown",
-                function(event) {
-
-                    if (
-                        event.key === "Enter"
-                    ) {
-
-                        searchPersons();
-
-                    }
-
-                }
+        const temperature =
+            Math.round(
+                data.current.temperature_2m
             );
 
+        document.getElementById("weather")
+            .innerText =
+            `☁️ ${temperature}°C`;
 
-        document
-            .getElementById("vehicleQuery")
-            .addEventListener(
-                "keydown",
-                function(event) {
+    }catch(error){
 
-                    if (
-                        event.key === "Enter"
-                    ) {
+        document.getElementById("weather")
+            .innerText =
+            "☁️ 天氣資料無法取得";
 
-                        searchVehicles();
+    }
+}
 
-                    }
+updateWeather();
 
-                }
-            );
+/* =========================================================
+   RENDER ALL
+========================================================= */
 
+function renderAll(){
 
-        document
-            .getElementById("warrantQuery")
-            .addEventListener(
-                "keydown",
-                function(event) {
+    renderHome();
+    renderNotifications();
+    renderCases();
+    renderSupports();
+    renderReports();
+    renderViolations();
+    renderTickets();
+    renderLogs();
+    searchWanted();
+}
 
-                    if (
-                        event.key === "Enter"
-                    ) {
+/* =========================================================
+   STARTUP
+========================================================= */
 
-                        searchWarrants();
+window.addEventListener("load",function(){
 
-                    }
+    loadSettings();
 
-                }
-            );
+    const savedId =
+        localStorage.getItem("mdt_login");
 
+    if(
+        savedId &&
+        policeDatabase[savedId]
+    ){
 
-        /* =========================
-           點擊背景關閉 Modal
-        ========================== */
+        currentUser =
+            policeDatabase[savedId];
 
-        document
-            .getElementById("detailModal")
-            .addEventListener(
-                "click",
-                function(event) {
+        document.getElementById("login-screen")
+            .style.display="none";
 
-                    if (
-                        event.target === this
-                    ) {
+        init();
 
-                        closeModal();
+    }else{
 
-                    }
+        document.getElementById("login-screen")
+            .style.display="flex";
+    }
 
-                }
-            );
-
-    </script>
+});
+</script>
 
 </body>
 </html>
+```
