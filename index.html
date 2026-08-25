@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stellar Capital | DOJ RP MDT</title>
+<title>Stellar Capital | Police MDT</title>
 
 <style>
 :root{
@@ -722,6 +722,9 @@ body.compact .nav-item{
         flex-wrap:wrap;
     }
 }
+
+/* ===== ENHANCED MDT ===== */
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.mini-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px}.mini-card b{font-size:18px}.mini-card small{display:block;color:var(--muted);margin-top:4px}.timeline{border-left:2px solid var(--border);margin:10px 0 0 8px;padding-left:18px}.timeline-item{position:relative;margin-bottom:16px}.timeline-item:before{content:"";position:absolute;left:-25px;top:4px;width:9px;height:9px;background:var(--blue);border-radius:50%;border:2px solid var(--card)}.chip-row{display:flex;gap:7px;flex-wrap:wrap}.chip{padding:5px 8px;border:1px solid var(--border);border-radius:999px;font-size:10px;color:var(--muted)}.permission-denied{padding:30px;text-align:center;color:var(--muted)}@media(max-width:900px){.stats,.status-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 
@@ -815,6 +818,14 @@ body.compact .nav-item{
             🔍 <span>通緝／協尋</span>
         </div>
 
+        <div class="nav-item" onclick="navigate('officers',this)">
+            👮 <span>警員中心</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('bolo',this)">
+            📢 <span>BOLO 協尋</span>
+        </div>
+
         <div class="nav-title">勤務中心</div>
 
         <div class="nav-item" onclick="navigate('cases',this)">
@@ -831,6 +842,14 @@ body.compact .nav-item{
 
         <div class="nav-item" onclick="navigate('reports',this)">
             📄 <span>案件報告</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('bookings',this)">
+            🔒 <span>逮捕紀錄</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('evidence',this)">
+            🧾 <span>證據管理</span>
         </div>
 
         <div class="nav-title">違規紀錄</div>
@@ -1330,6 +1349,31 @@ body.compact .nav-item{
 
 </section>
 
+<!-- ================= OFFICERS ================= -->
+<section id="page-officers" class="page">
+<div class="page-title"><h2>👮 警員中心</h2><p>在線警員、勤務狀態與基本資料</p></div>
+<div class="status-grid" id="officer-stats"></div>
+<div class="panel"><div class="panel-header"><div class="panel-title">在線／勤務警員</div><button class="btn primary" onclick="openOfficerModal()">➕ 新增警員</button></div><div id="officer-results"></div></div>
+</section>
+
+<!-- ================= BOLO ================= -->
+<section id="page-bolo" class="page">
+<div class="page-title"><h2>📢 BOLO／協尋</h2><p>人員、車輛與其他目標協尋資料</p></div>
+<div class="panel"><div class="panel-header"><div class="panel-title">協尋清單</div><button class="btn red" onclick="openBoloModal()">➕ 發布 BOLO</button></div><div id="bolo-results"></div></div>
+</section>
+
+<!-- ================= BOOKINGS ================= -->
+<section id="page-bookings" class="page">
+<div class="page-title"><h2>🔒 逮捕紀錄</h2><p>Booking、逮捕原因與移送狀態</p></div>
+<div class="panel"><div class="panel-header"><div class="panel-title">逮捕紀錄</div><button class="btn primary" onclick="openBookingModal()">➕ 建立逮捕紀錄</button></div><div id="booking-results"></div></div>
+</section>
+
+<!-- ================= EVIDENCE ================= -->
+<section id="page-evidence" class="page">
+<div class="page-title"><h2>🧾 證據管理</h2><p>案件證據、物證編號與保管紀錄</p></div>
+<div class="panel"><div class="panel-header"><div class="panel-title">證據清單</div><button class="btn primary" onclick="openEvidenceModal()">➕ 登記證據</button></div><div id="evidence-results"></div></div>
+</section>
+
 <!-- ================= LOGS ================= -->
 
 <section id="page-logs" class="page">
@@ -1691,6 +1735,11 @@ let currentUser = null;
 let dutyStart = null;
 let dutyInterval = null;
 
+let officerRecords = Object.values(policeDatabase).map(o=>({...o,status:"10-8",lastAction:"系統初始化"}));
+let bolos = [];
+let bookings = [];
+let evidence = [];
+
 /* =========================================================
    STORAGE
 ========================================================= */
@@ -1704,6 +1753,10 @@ function saveData(){
     localStorage.setItem("mdt_logs",JSON.stringify(logs));
     localStorage.setItem("mdt_people",JSON.stringify(people));
     localStorage.setItem("mdt_vehicles",JSON.stringify(vehicles));
+    localStorage.setItem("mdt_officers",JSON.stringify(officerRecords));
+    localStorage.setItem("mdt_bolos",JSON.stringify(bolos));
+    localStorage.setItem("mdt_bookings",JSON.stringify(bookings));
+    localStorage.setItem("mdt_evidence",JSON.stringify(evidence));
 }
 
 function loadData(){
@@ -1725,6 +1778,14 @@ function loadData(){
         if(storedLogs) logs = JSON.parse(storedLogs);
         if(storedPeople) people = JSON.parse(storedPeople);
         if(storedVehicles) vehicles = JSON.parse(storedVehicles);
+        const storedOfficers=localStorage.getItem("mdt_officers");
+        const storedBolos=localStorage.getItem("mdt_bolos");
+        const storedBookings=localStorage.getItem("mdt_bookings");
+        const storedEvidence=localStorage.getItem("mdt_evidence");
+        if(storedOfficers) officerRecords=JSON.parse(storedOfficers);
+        if(storedBolos) bolos=JSON.parse(storedBolos);
+        if(storedBookings) bookings=JSON.parse(storedBookings);
+        if(storedEvidence) evidence=JSON.parse(storedEvidence);
 
     }catch(error){
         console.error("MDT 資料載入失敗:",error);
@@ -4544,6 +4605,40 @@ async function updateWeather(){
 updateWeather();
 
 /* =========================================================
+   ENHANCED MODULES
+========================================================= */
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
+function canManage(){return ["警員","警長","Lieutenant","Chief"].includes(currentUser?.rank);}
+
+function renderOfficers(){
+ const el=document.getElementById("officer-results"), stats=document.getElementById("officer-stats"); if(!el)return;
+ const online=officerRecords.filter(x=>x.status!=="10-7").length, duty=officerRecords.filter(x=>x.status==="10-8"||x.status==="10-23").length;
+ stats.innerHTML=`<div class="mini-card"><b>${officerRecords.length}</b><small>警員總數</small></div><div class="mini-card"><b>${online}</b><small>在線警員</small></div><div class="mini-card"><b>${duty}</b><small>勤務中</small></div><div class="mini-card"><b>${officerRecords.filter(x=>x.status==="10-23").length}</b><small>現場單位</small></div>`;
+ el.innerHTML=`<table><thead><tr><th>警員</th><th>編號</th><th>單位</th><th>職階</th><th>狀態</th><th>操作</th></tr></thead><tbody>${officerRecords.map(o=>`<tr><td>${esc(o.name)}</td><td>${esc(o.id)}</td><td>${esc(o.dept)}</td><td>${esc(o.rank)}</td><td><span class="badge ${o.status==="10-8"?"green":o.status==="10-23"?"yellow":"red"}">${esc(o.status)}</span></td><td><button class="btn" onclick="setOfficerStatus('${esc(o.id)}')">切換狀態</button></td></tr>`).join("")}</tbody></table>`;
+}
+function setOfficerStatus(id){const o=officerRecords.find(x=>x.id===id);if(!o)return;const arr=["10-8","10-6","10-23","10-7"],i=arr.indexOf(o.status);o.status=arr[(i+1)%arr.length];o.lastAction=new Date().toLocaleString("zh-TW");addLog(`更新警員 ${id} 狀態 ${o.status}`);saveData();renderOfficers();}
+function openOfficerModal(){
+ if(!canManage()){openModal("權限不足",`<div class="permission-denied">只有管理職階可以新增警員。</div>`,`<button class="btn" onclick="closeModal()">關閉</button>`);return;}
+ openModal("👮 新增警員",`<div class="form-grid"><div class="form-group"><label>警員編號</label><input class="input" id="of-id"></div><div class="form-group"><label>姓名</label><input class="input" id="of-name"></div><div class="form-group"><label>單位</label><input class="input" id="of-dept" value="巡邏組"></div><div class="form-group"><label>職階</label><input class="input" id="of-rank" value="警員"></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="createOfficer()">建立</button>`);
+}
+function createOfficer(){const id=document.getElementById("of-id").value.trim();if(!id||!document.getElementById("of-name").value.trim())return alert("請填寫警員編號與姓名");officerRecords.push({id:id.startsWith("#")?id:"#"+id,name:document.getElementById("of-name").value.trim(),dept:document.getElementById("of-dept").value,rank:document.getElementById("of-rank").value,status:"10-7",lastAction:"剛建立"});addLog(`新增警員 ${id}`);saveData();closeModal();renderOfficers();}
+
+function renderBolos(){const el=document.getElementById("bolo-results");if(!el)return;if(!bolos.length){el.innerHTML=`<div class="empty">目前沒有 BOLO。</div>`;return;}el.innerHTML=`<table><thead><tr><th>編號</th><th>類型</th><th>目標</th><th>原因</th><th>發布人</th><th>狀態</th><th></th></tr></thead><tbody>${bolos.map(b=>`<tr><td>${b.id}</td><td>${b.type}</td><td>${esc(b.target)}</td><td>${esc(b.reason)}</td><td>${esc(b.officer)}</td><td><span class="badge ${b.status==="有效"?"red":"green"}">${b.status}</span></td><td><button class="btn" onclick="closeBolo('${b.id}')">${b.status==="有效"?"結案":"已結案"}</button></td></tr>`).join("")}</tbody></table>`;}
+function openBoloModal(){openModal("📢 發布 BOLO",`<div class="form-grid"><div class="form-group"><label>類型</label><select id="bo-type"><option>人員</option><option>車輛</option><option>其他</option></select></div><div class="form-group"><label>目標</label><input class="input" id="bo-target" placeholder="姓名／車牌／描述"></div><div class="form-group form-full"><label>協尋原因</label><textarea id="bo-reason"></textarea></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn red" onclick="createBolo()">發布</button>`);}
+function createBolo(){const b={id:"B-"+String(Date.now()).slice(-5),type:document.getElementById("bo-type").value,target:document.getElementById("bo-target").value.trim(),reason:document.getElementById("bo-reason").value.trim(),officer:currentUser.name,status:"有效",time:new Date().toLocaleString("zh-TW")};if(!b.target||!b.reason)return alert("請填寫目標與原因");bolos.unshift(b);notifications.unshift({title:"📢 新 BOLO",text:`${b.target} 已發布協尋。`,time:"剛剛"});addLog(`發布 BOLO ${b.id}`);saveData();closeModal();renderAll();}
+function closeBolo(id){const b=bolos.find(x=>x.id===id);if(!b)return;b.status="已結案";addLog(`結案 BOLO ${id}`);saveData();renderBolos();}
+
+function renderBookings(){const el=document.getElementById("booking-results");if(!el)return;if(!bookings.length){el.innerHTML=`<div class="empty">目前沒有逮捕紀錄。</div>`;return;}el.innerHTML=`<table><thead><tr><th>Booking</th><th>被捕人</th><th>原因</th><th>逮捕警員</th><th>時間</th><th>狀態</th></tr></thead><tbody>${bookings.map(b=>`<tr onclick="showBooking('${b.id}')" style="cursor:pointer"><td>${b.id}</td><td>${esc(b.person)}</td><td>${esc(b.reason)}</td><td>${esc(b.officer)}</td><td>${esc(b.time)}</td><td><span class="badge blue">${b.status}</span></td></tr>`).join("")}</tbody></table>`;}
+function openBookingModal(){openModal("🔒 建立逮捕紀錄",`<div class="form-grid"><div class="form-group"><label>被捕人</label><input class="input" id="bk-person"></div><div class="form-group"><label>案件編號</label><input class="input" id="bk-case" placeholder="#0012"></div><div class="form-group"><label>逮捕地點</label><input class="input" id="bk-location"></div><div class="form-group"><label>保釋</label><select id="bk-bail"><option>未決定</option><option>准予保釋</option><option>拒絕保釋</option></select></div><div class="form-group form-full"><label>逮捕原因／罪名</label><textarea id="bk-reason"></textarea></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="createBooking()">建立紀錄</button>`);}
+function createBooking(){const b={id:"BK-"+String(Date.now()).slice(-5),person:document.getElementById("bk-person").value.trim(),caseId:document.getElementById("bk-case").value.trim(),location:document.getElementById("bk-location").value.trim(),bail:document.getElementById("bk-bail").value,reason:document.getElementById("bk-reason").value.trim(),officer:currentUser.name,time:new Date().toLocaleString("zh-TW"),status:"等待移送"};if(!b.person||!b.reason)return alert("請至少填寫被捕人與逮捕原因");bookings.unshift(b);addLog(`建立逮捕紀錄 ${b.id}`);saveData();closeModal();renderBookings();}
+function showBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;openModal(`🔒 ${b.id}`,`<div class="detail-grid"><div class="detail-item"><small>被捕人</small><b>${esc(b.person)}</b></div><div class="detail-item"><small>案件</small><b>${esc(b.caseId||"無")}</b></div><div class="detail-item"><small>地點</small><b>${esc(b.location||"無")}</b></div><div class="detail-item"><small>保釋</small><b>${esc(b.bail)}</b></div><div class="detail-item"><small>逮捕警員</small><b>${esc(b.officer)}</b></div><div class="detail-item"><small>狀態</small><b>${esc(b.status)}</b></div></div><br><b>逮捕原因</b><p style="color:var(--muted);margin-top:8px;line-height:1.7">${esc(b.reason)}</p>`,`<button class="btn" onclick="closeModal()">關閉</button>`);}
+
+function renderEvidence(){const el=document.getElementById("evidence-results");if(!el)return;if(!evidence.length){el.innerHTML=`<div class="empty">目前沒有證據。</div>`;return;}el.innerHTML=`<table><thead><tr><th>證物編號</th><th>案件</th><th>類型</th><th>描述</th><th>登記人</th><th>狀態</th></tr></thead><tbody>${evidence.map(e=>`<tr><td>${e.id}</td><td>${esc(e.caseId)}</td><td>${esc(e.type)}</td><td>${esc(e.description)}</td><td>${esc(e.officer)}</td><td><span class="badge green">${e.status}</span></td></tr>`).join("")}</tbody></table>`;}
+function openEvidenceModal(){openModal("🧾 登記證據",`<div class="form-grid"><div class="form-group"><label>案件編號</label><input class="input" id="ev-case"></div><div class="form-group"><label>證據類型</label><select id="ev-type"><option>照片</option><option>影片</option><option>物證</option><option>文件</option><option>其他</option></select></div><div class="form-group form-full"><label>描述</label><textarea id="ev-desc"></textarea></div><div class="form-group form-full"><label>保存位置／備註</label><input class="input" id="ev-note"></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="createEvidence()">登記</button>`);}
+function createEvidence(){const e={id:"EV-"+String(Date.now()).slice(-5),caseId:document.getElementById("ev-case").value.trim(),type:document.getElementById("ev-type").value,description:document.getElementById("ev-desc").value.trim(),note:document.getElementById("ev-note").value.trim(),officer:currentUser.name,status:"保管中",time:new Date().toLocaleString("zh-TW")};if(!e.caseId||!e.description)return alert("請填寫案件編號與描述");evidence.unshift(e);addLog(`登記證據 ${e.id}`);saveData();closeModal();renderEvidence();}
+
+/* =========================================================
    RENDER ALL
 ========================================================= */
 
@@ -4557,6 +4652,10 @@ function renderAll(){
     renderViolations();
     renderTickets();
     renderLogs();
+    renderOfficers();
+    renderBolos();
+    renderBookings();
+    renderEvidence();
     searchWanted();
 }
 
